@@ -1,5 +1,5 @@
 [![Terraform Plan - DO Droplet](https://github.com/djnixy/skills-demo/actions/workflows/terraform-plan-do-droplet.yaml/badge.svg)](https://github.com/djnixy/skills-demo/actions/workflows/terraform-plan-do-droplet.yaml)
-
+[![Build and Push Docker Image for Odoo 14](https://github.com/djnixy/skills-demo/actions/workflows/docker-odoo14-build-push.yaml/badge.svg)](https://github.com/djnixy/skills-demo/actions/workflows/docker-odoo14-build-push.yaml)
 
 # skills-demo
 
