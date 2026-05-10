@@ -1,0 +1,33 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: external-dns
+  namespace: argocd
+spec:
+  description: Project for ExternalDNS management
+  sourceRepos:
+    - https://kubernetes-sigs.github.io/external-dns/
+    - https://github.com/djnixy/my-gitops-infra-stack
+  destinations:
+    - name: do-sgp1-demo-production-sg
+      namespace: argocd
+    - name: do-sgp1-demo-nonprod-sg
+      namespace: external-dns
+    - name: do-sgp1-demo-production-sg
+      namespace: external-dns
+    - name: do-syd1-demo-production-au
+      namespace: external-dns
+  clusterResourceWhitelist:
+    - group: argoproj.io
+      kind: Application
+    - group: k8s.bitwarden.com
+      kind: BitwardenSecret
+    - group: apiextensions.k8s.io
+      kind: CustomResourceDefinition
+    - group: rbac.authorization.k8s.io
+      kind: ClusterRole
+    - group: rbac.authorization.k8s.io
+      kind: ClusterRoleBinding
+  namespaceResourceWhitelist:
+    - group: "*"
+      kind: "*"

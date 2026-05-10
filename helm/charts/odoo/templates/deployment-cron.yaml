@@ -1,0 +1,263 @@
+{{- if .Values.cron.enabled }}
+
+{{- if .Values.cron.sharding.enabled }}
+{{/*
+=================================================================
+SHARDED MODE: Create one Deployment per database in the list
+=================================================================
+*/}}
+{{- $dbList := .Values.cron.sharding.databaseList | splitList "," }}
+{{- range $dbName := $dbList }}
+{{- if $dbName }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "odoo.fullname" $ }}-cron-{{ $dbName | kebabcase }}
+  labels:
+    {{- include "odoo.labels" $ | nindent 4 }}
+    app.kubernetes.io/component: cron-shard
+    demo.com/db-shard: {{ $dbName }}
+spec:
+  revisionHistoryLimit: 3
+  replicas: 1 # Always 1 replica for a sharded pod
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 0
+  selector:
+    matchLabels:
+      {{- include "odoo.selectorLabels" $ | nindent 6 }}
+      app.kubernetes.io/component: cron-shard
+      demo.com/db-shard: {{ $dbName }}
+  template:
+    metadata:
+      labels:
+        {{- include "odoo.labels" $ | nindent 8 }}
+        app.kubernetes.io/component: cron-shard
+        demo.com/db-shard: {{ $dbName }}
+        {{- with $.Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- with $.Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      serviceAccountName: {{ include "odoo.serviceAccountName" $ }}
+      {{- with $.Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $.Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ $.Chart.Name }}-cron-{{ $dbName | kebabcase }}
+          image: "{{ $.Values.image.repository }}:{{ $.Values.image.tag | default $.Chart.AppVersion }}"
+          imagePullPolicy: {{ $.Values.image.pullPolicy }}
+          {{- with $.Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ $.Values.service.port }}
+              protocol: TCP
+          env:
+            - name: HTTP_ENABLE
+              value: "False"
+            - name: PORT
+              value: "8061"
+            - name: DBFILTER
+              value: ".*"
+            - name: DB_NAME
+              value: {{ $dbName | quote }} # <-- Sets the specific DB for this pod
+            - name: DB_HOST
+              value: {{ $.Values.cron.dbHost | default (index $.Values.env "DB_HOST") | quote }}
+            - name: DB_PORT
+              value: {{ $.Values.cron.dbPort | default (index $.Values.env "DB_PORT" | default "5432") | quote }}
+            - name: DB_MAXCONN
+              value: {{ $.Values.cron.dbMaxConn | default (index $.Values.env "DB_MAXCONN" | default "5") | quote }}
+            - name: LIST_DB
+              value: "True"
+            - name: LOG_LEVEL
+              value: {{ $.Values.cron.logLevel | quote }}
+            - name: REDIS_SESSION
+              value: "False"
+            - name: MAX_CRON_THREADS
+              value: {{ $.Values.cron.maxCronThreads | quote }}
+            - name: SERVER_WIDE_MODULES
+              value: "base"
+            - name: WORKERS
+              value: {{ $.Values.cron.workers | default "0" | quote }}
+            {{- range $key, $val := $.Values.env }}
+            {{- if not (has $key (list "HTTP_ENABLE" "PORT" "DBFILTER" "DB_NAME" "DB_HOST" "DB_PORT" "DB_MAXCONN" "LIST_DB" "LOG_LEVEL" "REDIS_SESSION" "MAX_CRON_THREADS" "SERVER_WIDE_MODULES" "WORKERS")) }}
+            - name: {{ $key }}
+              value: {{ $val | quote }}
+            {{- end }}
+            {{- end }}
+            {{- range $envName, $secretKey := $.Values.secretEnv }}
+            - name: {{ $envName }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $.Values.secretEnvName }}
+                  key: {{ $secretKey }}
+            {{- end }}
+
+          {{- with $.Values.cron.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+
+          volumeMounts:
+            - name: data-volume
+              mountPath: {{ $.Values.persistence.mountPath }}
+      volumes:
+        - name: data-volume
+          persistentVolumeClaim:
+            claimName: {{ include "odoo.fullname" $ }}-pvc
+      {{- with $.Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $.Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $.Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+---
+{{- end }}
+{{- end }}
+
+{{- else }}
+{{/*
+=================================================================
+NON-SHARDED MODE: Original single Deployment
+=================================================================
+*/}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "odoo.fullname" . }}-cron
+  labels:
+    {{- include "odoo.labels" . | nindent 4 }}
+    app.kubernetes.io/component: cron
+spec:
+  revisionHistoryLimit: 3
+  replicas: {{ .Values.cron.replicas | default 0 }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 0
+  selector:
+    matchLabels:
+      {{- include "odoo.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: cron
+  template:
+    metadata:
+      labels:
+        {{- include "odoo.labels" . | nindent 8 }}
+        app.kubernetes.io/component: cron
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      serviceAccountName: {{ include "odoo.serviceAccountName" . }}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}-cron
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          env:
+            - name: HTTP_ENABLE
+              value: "False"
+            - name: PORT
+              value: "8061"
+            - name: DBFILTER
+              value: ".*"
+            - name: DB_NAME
+              value: {{ .Values.cron.dbName | quote }}
+            - name: DB_HOST
+              value: {{ .Values.cron.dbHost | default (index .Values.env "DB_HOST") | quote }}
+            - name: DB_PORT
+              value: {{ .Values.cron.dbPort | default (index .Values.env "DB_PORT" | default "5432") | quote }}
+            - name: DB_MAXCONN
+              value: {{ .Values.cron.dbMaxConn | default (index .Values.env "DB_MAXCONN" | default "60") | quote }}
+            - name: LIST_DB
+              value: "True"
+            - name: LOG_LEVEL
+              value: {{ .Values.cron.logLevel | quote }}
+            - name: REDIS_SESSION
+              value: "False"
+            - name: MAX_CRON_THREADS
+              value: {{ .Values.cron.maxCronThreads | quote }}
+            - name: SERVER_WIDE_MODULES
+              value: "base"
+            - name: WORKERS
+              value: {{ .Values.cron.workers | default "0" | quote }}
+            {{- range $key, $val := .Values.env }}
+            {{- if not (has $key (list "HTTP_ENABLE" "PORT" "DBFILTER" "DB_NAME" "DB_HOST" "DB_PORT" "DB_MAXCONN" "LIST_DB" "LOG_LEVEL" "REDIS_SESSION" "MAX_CRON_THREADS" "SERVER_WIDE_MODULES" "WORKERS")) }}
+            - name: {{ $key }}
+              value: {{ $val | quote }}
+            {{- end }}
+            {{- end }}
+            {{- range $envName, $secretKey := .Values.secretEnv }}
+            - name: {{ $envName }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $.Values.secretEnvName }}
+                  key: {{ $secretKey }}
+            {{- end }}
+
+          {{- with .Values.cron.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+
+          volumeMounts:
+            - name: data-volume
+              mountPath: {{ $.Values.persistence.mountPath }}
+      volumes:
+        - name: data-volume
+          persistentVolumeClaim:
+            claimName: {{ include "odoo.fullname" . }}-pvc
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}
+
+{{- end }}

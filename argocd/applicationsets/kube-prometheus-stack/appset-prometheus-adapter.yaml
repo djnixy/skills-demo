@@ -1,0 +1,59 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: prometheus-adapter-stack
+  namespace: argocd
+spec:
+  generators:
+    - list:
+        elements:
+          - cluster: do-sgp1-demo-nonprod-sg
+            env: nonprod-sg
+            namespace: monitoring
+            prometheus_url: http://kps-prometheus.monitoring.svc
+          - cluster: do-sgp1-demo-production-sg
+            env: prod-sg
+            namespace: monitoring
+            prometheus_url: http://kps-prometheus.monitoring.svc
+          - cluster: do-syd1-demo-production-au
+            env: prod-au
+            namespace: monitoring
+            prometheus_url: http://kps-prometheus.monitoring.svc
+  template:
+    metadata:
+      name: 'prometheus-adapter-{{env}}'
+    spec:
+      project: default
+      source:
+        repoURL: https://prometheus-community.github.io/helm-charts
+        chart: prometheus-adapter
+        targetRevision: 5.2.0
+        helm:
+          releaseName: prometheus-adapter
+          values: |
+            prometheus:
+              url: '{{prometheus_url}}'
+              port: 9090
+
+            rules:
+              custom:
+                - seriesQuery: '{__name__=~"nginx_ingress_controller_requests",namespace!=""}'
+                  resources:
+                    overrides:
+                      exported_namespace: {resource: "namespace"}
+                      exported_service: {resource: "service"}
+                  name:
+                    matches: ""
+                    as: "nginx_requests_per_second"
+                  metricsQuery: "sum(rate(<<.Series>>{<<.LabelMatchers>>}[2m])) by (<<.GroupBy>>)"
+
+      destination:
+        name: '{{cluster}}'
+        namespace: '{{namespace}}'
+      
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true

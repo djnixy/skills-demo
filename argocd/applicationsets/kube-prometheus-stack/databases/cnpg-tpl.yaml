@@ -1,0 +1,79 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: placeholder
+  annotations:
+    cnpg.io/hibernation: "off"
+spec:
+  description: placeholder
+  imageName: placeholder # <==== Use ghcr.io/cloudnative-pg/postgresql:14 in applicationset
+  imagePullPolicy: IfNotPresent
+  enableSuperuserAccess: true
+  superuserSecret:
+    name: placeholder
+  bootstrap:
+    initdb:
+      database: placeholder
+      encoding: UTF8
+      localeCType: C
+      localeCollate: C
+      owner: placeholder
+      secret:
+        name: placeholder
+  instances: placeholder
+  # primaryUpdateStrategy: unsupervised
+  # primaryUpdateMethod: switchover
+  
+  # --- Synchronous Replication Settings ---
+  # minSyncReplicas = 0:
+  #   - Primary will always accept writes, even if no replicas are available
+  #   - Prioritizes availability (no write blocking)
+  #
+  # maxSyncReplicas = 1:
+  #   - Enables synchronous replication when at least one replica is available
+  #   - Improves data safety, replica will auto-catch up when it comes back
+  #
+  # maxSyncReplicas = 0:
+  #   - Disables synchronous replication entirely
+  #   - All writes are asynchronous (like standalone mode)
+  #   - Fastest writes, but risk of data loss if primary crashes before replica syncs
+  minSyncReplicas: placeholder
+  maxSyncReplicas: placeholder
+
+  postgresql:
+    parameters:
+      max_connections: placeholder
+      log_temp_files: placeholder
+      shared_buffers: placeholder
+      work_mem: placeholder
+      maintenance_work_mem: placeholder
+
+  resources:
+    requests:
+      cpu: placeholder
+      memory: placeholder
+    limits:
+      cpu: placeholder
+      memory: placeholder
+  storage:
+    storageClass: do-block-storage
+    size: placeholder
+    
+  affinity: {}
+  # affinity:
+  #   tolerations:
+  #   - key: "workload"
+  #     operator: "Equal"
+  #     value: "database"
+  #     effect: "NoSchedule"
+  #   nodeAffinity:
+  #     requiredDuringSchedulingIgnoredDuringExecution:
+  #       nodeSelectorTerms:
+  #       - matchExpressions:
+  #         - key: workload
+  #           operator: In
+  #           values:
+  #           - database
+            
+  monitoring:
+    enablePodMonitor: placeholder

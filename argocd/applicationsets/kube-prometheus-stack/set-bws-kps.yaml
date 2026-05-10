@@ -1,0 +1,157 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: bws-kps
+  namespace: argocd
+spec:
+  generators:
+    - list:
+        elements:
+          - name: bws-kps-nonprod-sg
+            cluster: do-sgp1-demo-nonprod-sg
+            
+            # --- BITWARDEN SECRET MAPPING ---
+            authTokenSecretName: bwsmma-auth-token-monitoring
+            # 1. Grafana Admin
+            secretKeyName1: grafana_admin_user
+            bwSecretId1: baf49e4c-2087-4e82-9f23-b3a000864851
+            secretKeyName2: grafana_admin_password
+            bwSecretId2: a53572ff-60ae-44d9-9d69-b3a000866052
+            
+            # 2. AWS SES (SMTP)
+            secretKeyName3: aws_ses_access_id
+            bwSecretId3: b48d1867-f2ce-4eda-9d3c-b3a000a6cab1
+
+            secretKeyName4: aws_ses_secret_key
+            bwSecretId4: 8fd857c2-2f85-4032-a29f-b3a000a6ff55
+            
+            # 3. Datasource Passwords
+            secretKeyName5: basic_auth_username
+            bwSecretId5: 4e533b41-4c20-4efe-bfa1-b3a0003de89f
+            secretKeyName6: basic_auth_password
+            bwSecretId6: 9f1027a1-df62-4d5a-b820-b3a0003e0635
+            
+            # 4. Prometheus Ingress Auth (Full htpasswd content)
+            secretKeyName7: auth
+            bwSecretId7: d2a64687-0b1f-43da-9065-b3a0002fe1c0
+
+          - name: bws-kps-prod-sg
+            cluster: do-sgp1-demo-production-sg
+            
+            # --- BITWARDEN SECRET MAPPING ---
+            authTokenSecretName: bwsmma-auth-token-monitoring
+            # 1. Grafana Admin
+            secretKeyName1: grafana_admin_user
+            bwSecretId1: baf49e4c-2087-4e82-9f23-b3a000864851
+            secretKeyName2: grafana_admin_password
+            bwSecretId2: a53572ff-60ae-44d9-9d69-b3a000866052
+            
+            # 2. AWS SES (SMTP)
+            secretKeyName3: aws_ses_access_id
+            bwSecretId3: b48d1867-f2ce-4eda-9d3c-b3a000a6cab1
+
+            secretKeyName4: aws_ses_secret_key
+            bwSecretId4: 8fd857c2-2f85-4032-a29f-b3a000a6ff55
+            
+            # 3. Datasource Passwords
+            secretKeyName5: basic_auth_username
+            bwSecretId5: 4e533b41-4c20-4efe-bfa1-b3a0003de89f
+            secretKeyName6: basic_auth_password
+            bwSecretId6: 9f1027a1-df62-4d5a-b820-b3a0003e0635
+            
+            # 4. Prometheus Ingress Auth (Full htpasswd content)
+            secretKeyName7: auth
+            bwSecretId7: d2a64687-0b1f-43da-9065-b3a0002fe1c0
+
+            secretKeyName8: grafana_github_token
+            bwSecretId8: ca2524b4-7df0-4d7d-8436-b3a300291101
+
+            secretKeyName9: uptime_kuma_api_token
+            bwSecretId9: 252df644-1e6e-4410-be6a-b3a3003b3154
+
+            secretKeyName10: grafana_db_username
+            bwSecretId10: 9f412f21-31b7-490e-ba9f-b347005efc5b
+            secretKeyName11: grafana_db_password
+            bwSecretId11: 33f06dab-95be-4026-9681-b347005f1bae
+
+          - name: bws-kps-prod-au
+            cluster: do-syd1-demo-production-au
+            
+            # --- BITWARDEN SECRET MAPPING ---
+            authTokenSecretName: bwsmma-auth-token-monitoring
+            # 1. Grafana Admin
+            secretKeyName1: grafana_admin_user
+            bwSecretId1: baf49e4c-2087-4e82-9f23-b3a000864851
+            secretKeyName2: grafana_admin_password
+            bwSecretId2: a53572ff-60ae-44d9-9d69-b3a000866052
+            
+            # 2. AWS SES (SMTP)
+            secretKeyName3: aws_ses_access_id
+            bwSecretId3: b48d1867-f2ce-4eda-9d3c-b3a000a6cab1
+
+            secretKeyName4: aws_ses_secret_key
+            bwSecretId4: 8fd857c2-2f85-4032-a29f-b3a000a6ff55
+            
+            # 3. Datasource Passwords
+            secretKeyName5: basic_auth_username
+            bwSecretId5: 4e533b41-4c20-4efe-bfa1-b3a0003de89f
+            secretKeyName6: basic_auth_password
+            bwSecretId6: 9f1027a1-df62-4d5a-b820-b3a0003e0635
+            
+            # 4. Prometheus Ingress Auth (Full htpasswd content)
+            secretKeyName7: auth
+            bwSecretId7: d2a64687-0b1f-43da-9065-b3a0002fe1c0
+  template:
+    metadata:
+      name: '{{name}}'
+      annotations:
+        # This forces ArgoCD to delete/recreate ONLY this resource
+        # argocd.argoproj.io/sync-options: Replace=true
+        argocd.argoproj.io/sync-options: Force=true,Replace=true
+    spec:
+      project: kube-prometheus-stack
+      revisionHistoryLimit: 2
+      source:
+        repoURL: https://github.com/djnixy/my-gitops-infra-stack
+        targetRevision: main
+        path: argocd/applicationsets/grafana-loki/credentials
+        kustomize:
+          patches:
+            - patch: |
+                [
+                  { "op": "replace", "path": "/metadata/name", "value": "{{name}}" },
+                  { "op": "replace", "path": "/spec/secretName", "value": "{{name}}" },
+                  { "op": "replace", "path": "/spec/authToken/secretName", "value": "{{authTokenSecretName}}" },
+                  {
+                    "op": "replace",
+                    "path": "/spec/map",
+                    "value": [
+                      { "secretKeyName": "{{secretKeyName1}}", "bwSecretId": "{{bwSecretId1}}" },
+                      { "secretKeyName": "{{secretKeyName2}}", "bwSecretId": "{{bwSecretId2}}" },
+                      { "secretKeyName": "{{secretKeyName3}}", "bwSecretId": "{{bwSecretId3}}" },
+                      { "secretKeyName": "{{secretKeyName4}}", "bwSecretId": "{{bwSecretId4}}" },
+                      { "secretKeyName": "{{secretKeyName5}}", "bwSecretId": "{{bwSecretId5}}" },
+                      { "secretKeyName": "{{secretKeyName6}}", "bwSecretId": "{{bwSecretId6}}" },
+                      { "secretKeyName": "{{secretKeyName7}}", "bwSecretId": "{{bwSecretId7}}" },
+                      { "secretKeyName": "{{secretKeyName8}}", "bwSecretId": "{{bwSecretId8}}" },
+                      { "secretKeyName": "{{secretKeyName9}}", "bwSecretId": "{{bwSecretId9}}" },
+                      { "secretKeyName": "{{secretKeyName10}}", "bwSecretId": "{{bwSecretId10}}" },
+                      { "secretKeyName": "{{secretKeyName11}}", "bwSecretId": "{{bwSecretId11}}" }
+                    ]
+                  }
+                ]
+              target:
+                kind: BitwardenSecret
+                name: placeholder
+
+      destination:
+        name: '{{cluster}}'
+        namespace: monitoring
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply=true
+          # - Replace=true

@@ -1,0 +1,15 @@
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-traefik-prod
+  namespace: cert-manager
+spec:
+  acme:
+    email: devops@demo.com
+    server: https://acme-v02.api.letsencrypt.org/directory
+    privateKeySecretRef:
+      name: demo-traefik-prod-key
+    solvers:
+    - http01:
+        ingress:
+          class: traefik

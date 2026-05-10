@@ -1,0 +1,179 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: grafana-cnpg-stack
+  namespace: argocd
+spec:
+  goTemplate: true
+  # syncPolicy:
+  #   preserveResourcesOnDeletion: true
+  generators:
+    - list:
+        elements:
+          - appName: grafana
+            environment: prod-sg
+            targetRevision: HEAD
+            clusterName: do-sgp1-demo-production-sg
+
+            # --- Bitwarden Secret Variables ---
+            BwAuthTokenSecretName: bwsmma-auth-token-monitoring
+
+            BwSuperUserSecretUserNameId: 00e5c635-9784-4c45-8283-b347005edf00
+            BwSuperUserSecretUserPasswordId: f2b8d525-b779-42c8-9580-b347005eaa1e
+            BwUserSecretUserNameId: 9f412f21-31b7-490e-ba9f-b347005efc5b
+            BwUserSecretUserPasswordId: 33f06dab-95be-4026-9681-b347005f1bae
+
+            # --- CNPG Cluster Variables ---
+            clusterDescription: "PostgreSQL 14 database cluster"
+            postgresVersion: "14"
+            dbName: "grafana_production"
+            dbOwner: "grafana"
+            instances: "1"
+            minSyncReplicas: "0"
+            maxSyncReplicas: "0"
+            maxConnections: "100"
+            logTempFiles: "0"
+            sharedBuffers: "128MB"
+            workMem: "8MB"
+            maintenanceWorkMem: "64MB"
+            cpuRequest: "100m"
+            memoryRequest: "200Mi"
+            cpuLimit: "" # if not set, then unlimited
+            memoryLimit: "200Mi"
+            storageSize: "1Gi"
+            enablePodMonitor: "false"
+            # --- Scheduling Variables ---
+            # IF YOU DO NOT WANT AFFINITY:
+            # Simply remove or comment out the two lines below.
+            affinityKey: ""
+            affinityValue: ""
+            
+  template:
+    metadata:
+      name: "grafana-cnpg-{{.environment}}"
+    spec:
+      project: kube-prometheus-stack
+      sources:
+        - repoURL: https://github.com/djnixy/my-gitops-infra-stack
+          targetRevision: "{{.targetRevision}}"
+          path: argocd/templates/credentials/db
+          kustomize:
+            patches:
+              - target:
+                  kind: BitwardenSecret
+                  name: superusersecret
+                patch: |
+                  [
+                    { "op": "replace", "path": "/metadata/name", "value": "bws-{{.appName}}-cnpg-superusersecret-{{.environment}}" },
+                    { "op": "replace", "path": "/spec/secretName", "value": "bws-{{.appName}}-cnpg-superusersecret-{{.environment}}" },
+                    { "op": "replace", "path": "/spec/authToken/secretName", "value": "{{.BwAuthTokenSecretName}}" },
+                    {
+                      "op": "replace",
+                      "path": "/spec/map",
+                      "value": [
+                        { "secretKeyName": "username", "bwSecretId": "{{.BwSuperUserSecretUserNameId}}" },
+                        { "secretKeyName": "password", "bwSecretId": "{{.BwSuperUserSecretUserPasswordId}}" }
+                      ]
+                    }
+                  ]
+              - target:
+                  kind: BitwardenSecret
+                  name: usersecret
+                patch: |
+                  [
+                    { "op": "replace", "path": "/metadata/name", "value": "bws-{{.appName}}-cnpg-usersecret-{{.environment}}" },
+                    { "op": "replace", "path": "/spec/secretName", "value": "bws-{{.appName}}-cnpg-usersecret-{{.environment}}" },
+                    { "op": "replace", "path": "/spec/authToken/secretName", "value": "{{.BwAuthTokenSecretName}}" },
+                    {
+                      "op": "replace",
+                      "path": "/spec/map",
+                      "value": [
+                        { "secretKeyName": "username", "bwSecretId": "{{.BwUserSecretUserNameId}}" },
+                        { "secretKeyName": "password", "bwSecretId": "{{.BwUserSecretUserPasswordId}}" }
+                      ]
+                    }
+                  ]
+
+        - repoURL: https://github.com/djnixy/my-gitops-infra-stack
+          targetRevision: "{{.targetRevision}}"
+          path: argocd/applicationsets/kube-prometheus-stack/databases
+          kustomize:
+            patches:
+              - target:
+                  kind: Cluster
+                  name: placeholder
+                patch: |
+                  [
+                    { "op": "replace", "path": "/metadata/name", "value": "{{.appName}}-{{.environment}}" },
+                    { "op": "replace", "path": "/spec/description", "value": "{{.clusterDescription}}" },
+                    { "op": "replace", "path": "/spec/imageName", "value": "ghcr.io/cloudnative-pg/postgresql:{{.postgresVersion}}" },
+                    
+                    { "op": "replace", "path": "/spec/superuserSecret/name", "value": "bws-{{.appName}}-cnpg-superusersecret-{{.environment}}" },
+                    { "op": "replace", "path": "/spec/bootstrap/initdb/database", "value": "{{.dbName}}" },
+                    { "op": "replace", "path": "/spec/bootstrap/initdb/owner", "value": "{{.dbOwner}}" },
+                    
+                    { "op": "replace", "path": "/spec/bootstrap/initdb/secret/name", "value": "bws-{{.appName}}-cnpg-usersecret-{{.environment}}" },
+                    { "op": "replace", "path": "/spec/instances", "value": {{.instances}} },
+                    { "op": "replace", "path": "/spec/minSyncReplicas", "value": {{.minSyncReplicas}} },
+                    { "op": "replace", "path": "/spec/maxSyncReplicas", "value": {{.maxSyncReplicas}} },
+                    { "op": "replace", "path": "/spec/postgresql/parameters/max_connections", "value": "{{.maxConnections}}" },
+                    { "op": "replace", "path": "/spec/postgresql/parameters/log_temp_files", "value": "{{.logTempFiles}}" },
+                    { "op": "replace", "path": "/spec/postgresql/parameters/shared_buffers", "value": "{{.sharedBuffers}}" },
+                    { "op": "replace", "path": "/spec/postgresql/parameters/work_mem", "value": "{{.workMem}}" },
+                    { "op": "replace", "path": "/spec/postgresql/parameters/maintenance_work_mem", "value": "{{.maintenanceWorkMem}}" },
+                    { "op": "replace", "path": "/spec/resources/requests/cpu", "value": "{{.cpuRequest}}" },
+                    { "op": "replace", "path": "/spec/resources/requests/memory", "value": "{{.memoryRequest}}" },
+
+                    {{- if .cpuLimit }}
+                    { "op": "replace", "path": "/spec/resources/limits/cpu", "value": "{{.cpuLimit}}" },
+                    {{- else }}
+                    { "op": "remove", "path": "/spec/resources/limits/cpu" },
+                    {{- end }}
+
+                    { "op": "replace", "path": "/spec/resources/limits/memory", "value": "{{.memoryLimit}}" },
+                    { "op": "replace", "path": "/spec/storage/size", "value": "{{.storageSize}}" },
+                    { "op": "replace", "path": "/spec/monitoring/enablePodMonitor", "value": {{.enablePodMonitor}} }
+
+                    {{- if .affinityKey }}
+                    ,
+                    { 
+                      "op": "replace", 
+                      "path": "/spec/affinity", 
+                      "value": {
+                        "tolerations": [
+                          {
+                            "key": "{{.affinityKey}}",
+                            "operator": "Equal",
+                            "value": "{{.affinityValue}}",
+                            "effect": "NoSchedule"
+                          }
+                        ],
+                        "nodeAffinity": {
+                          "requiredDuringSchedulingIgnoredDuringExecution": {
+                            "nodeSelectorTerms": [
+                              {
+                                "matchExpressions": [
+                                  {
+                                    "key": "{{.affinityKey}}",
+                                    "operator": "In",
+                                    "values": [ "{{.affinityValue}}" ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    }
+                    {{- end }}
+                  ]
+
+      destination:
+        name: "{{.clusterName}}"
+        namespace: monitoring
+      # syncPolicy:
+      #   syncOptions:
+      #     - CreateNamespace=true
+      #   automated:
+      #     prune: true
+      #     selfHeal: true

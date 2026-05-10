@@ -1,0 +1,22 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: ingress
+  namespace: argocd
+spec:
+  description: Project for deploying ingress
+  sourceRepos:
+    - https://kubernetes.github.io/ingress-nginx
+    - ghcr.io/traefik/helm #oci
+
+  destinations:
+    - namespace: '*'
+      server: '*'
+  clusterResourceWhitelist:
+    - group: '*'
+      kind: '*'
+  namespaceResourceWhitelist:
+    - group: '*'
+      kind: '*'
+  orphanedResources:
+    warn: false

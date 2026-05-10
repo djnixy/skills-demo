@@ -1,0 +1,19 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: grafana-promtail
+  namespace: argocd
+spec:
+  description: Project for deploying grafana/promtail across clusters
+  sourceRepos:
+    - https://grafana.github.io/helm-charts
+    - https://github.com/djnixy/my-gitops-infra-stack
+  destinations:
+    - namespace: 'monitoring'
+      server: '*'
+  clusterResourceWhitelist:
+    - group: "*"
+      kind: "*"
+  namespaceResourceWhitelist:
+    - group: "*"
+      kind: "*"

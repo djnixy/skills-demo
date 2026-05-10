@@ -1,0 +1,51 @@
+name: Release Multiple Charts
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  list-charts:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@1af3b93e4f16b251a37c95b6c318534882772591 # v6.0.0
+      - id: set-matrix
+        run: |
+          # Finds all directories, then filters out the 'template' folder
+          CHARTS=$(ls -d helm/charts/*/ | grep -v "/template/" | jq -R -s -c 'split("\n")[:-1]')
+          echo "matrix=$CHARTS" >> $GITHUB_OUTPUT
+
+  publish:
+    needs: list-charts
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        chart_path: ${{ fromJson(needs.list-charts.outputs.matrix) }}
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@1af3b93e4f16b251a37c95b6c318534882772591 # v6.0.0
+      
+      - name: Login to GHCR
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | helm registry login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Package and Push
+        run: |
+          CHART_NAME=$(basename ${{ matrix.chart_path }})
+          echo "Processing chart: $CHART_NAME"
+          
+          helm package ${{ matrix.chart_path }}
+        
+          helm push ${CHART_NAME}-*.tgz oci://ghcr.io/djnixy/charts

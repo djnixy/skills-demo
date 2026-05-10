@@ -1,0 +1,182 @@
+# values-alerting-db.yaml
+grafana:
+  alerting:
+    db-rules.yaml:
+      apiVersion: 1
+      groups:
+        # --- GROUP 1: NON-PROD SG DATABASES ---
+        - orgId: 1
+          name: "cnpg-health-nonprod-sg"
+          folder: "Cluster: NonProd SG"
+          interval: 1m
+          rules:
+            # 1. CNPG Dev
+            - uid: "cnpg_health_dev"
+              title: "DB Health: Core Dev"
+              condition: "C"
+              for: 0m
+              noDataState: OK
+              execErrState: Error
+              labels:
+                severity: "critical"
+                team: "devops"
+                env: "dev"
+                db_cluster: "pg14-core-dev"
+              annotations:
+                summary: "Dev Database Issue"
+                description: 'Cluster pg14-core-dev (Pod {{ "{{" }} $labels.pod {{ "}}" }}) is reporting errors. Log count: {{ "{{" }} $values.B.Value {{ "}}" }}'
+              data:
+                - refId: "A"
+                  datasourceUid: "loki"
+                  queryType: "range"
+                  relativeTimeRange: { from: 900, to: 0 }
+                  model:
+                    editorMode: "code"
+                    expr: 'count_over_time({pod=~"pg14-core-dev-.*"} |~ "(?i)(unhealthy|restart|panic|fatal|switchover|fencing|wal receiver process .* terminated)" [5m])'
+                    refId: "A"
+                - refId: "B"
+                  datasourceUid: "__expr__"
+                  queryType: "reduce"
+                  model: { expression: "A", reducer: "sum", refId: "B", type: "reduce" }
+                - refId: "C"
+                  datasourceUid: "__expr__"
+                  queryType: "math"
+                  model: { expression: "$B > 0", refId: "C", type: "math" }
+
+            # 2. CNPG SGA
+            - uid: "cnpg_health_sga"
+              title: "DB Health: Core SGA"
+              condition: "C"
+              for: 0m
+              noDataState: OK
+              execErrState: Error
+              labels:
+                severity: "critical"
+                team: "devops"
+                env: "sga"
+                db_cluster: "pg14-core-sga"
+              annotations:
+                summary: "SGA Database Issue"
+                description: 'Cluster pg14-core-sga (Pod {{ "{{" }} $labels.pod {{ "}}" }}) is reporting errors. Log count: {{ "{{" }} $values.B.Value {{ "}}" }}'
+              data:
+                - refId: "A"
+                  datasourceUid: "loki"
+                  queryType: "range"
+                  relativeTimeRange: { from: 900, to: 0 }
+                  model:
+                    editorMode: "code"
+                    expr: 'count_over_time({pod=~"pg14-core-sga-.*"} |~ "(?i)(unhealthy|restart|panic|fatal|switchover|fencing|wal receiver process .* terminated)" [5m])'
+                    refId: "A"
+                - refId: "B"
+                  datasourceUid: "__expr__"
+                  queryType: "reduce"
+                  model: { expression: "A", reducer: "sum", refId: "B", type: "reduce" }
+                - refId: "C"
+                  datasourceUid: "__expr__"
+                  queryType: "math"
+                  model: { expression: "$B > 0", refId: "C", type: "math" }
+
+        # --- GROUP 2: PROD SG DATABASES ---
+        - orgId: 1
+          name: "cnpg-health-prod-sg"
+          folder: "Cluster: Prod SG"
+          interval: 1m
+          rules:
+            # 3. CNPG Carwash
+            - uid: "cnpg_health_carwash"
+              title: "DB Health: Core Carwash"
+              condition: "C"
+              for: 0m
+              noDataState: OK
+              execErrState: Error
+              labels:
+                severity: "critical"
+                team: "devops"
+                env: "carwash"
+                db_cluster: "pg14-core-carwash"
+              annotations:
+                summary: "Carwash Database Issue"
+                description: 'Cluster pg14-core-carwash (Pod {{ "{{" }} $labels.pod {{ "}}" }}) is reporting errors. Log count: {{ "{{" }} $values.B.Value {{ "}}" }}'
+              data:
+                - refId: "A"
+                  datasourceUid: "loki"
+                  queryType: "range"
+                  relativeTimeRange: { from: 900, to: 0 }
+                  model:
+                    editorMode: "code"
+                    expr: 'count_over_time({pod=~"pg14-core-carwash-.*"} |~ "(?i)(unhealthy|restart|panic|fatal|switchover|fencing|wal receiver process .* terminated)" [5m])'
+                    refId: "A"
+                - refId: "B"
+                  datasourceUid: "__expr__"
+                  queryType: "reduce"
+                  model: { expression: "A", reducer: "sum", refId: "B", type: "reduce" }
+                - refId: "C"
+                  datasourceUid: "__expr__"
+                  queryType: "math"
+                  model: { expression: "$B > 0", refId: "C", type: "math" }
+
+            # 4. CNPG GroupA
+            - uid: "cnpg_health_groupa"
+              title: "DB Health: Core GroupA"
+              condition: "C"
+              for: 0m
+              noDataState: OK
+              execErrState: Error
+              labels:
+                severity: "critical"
+                team: "devops"
+                env: "groupa"
+                db_cluster: "pg14-core-groupa"
+              annotations:
+                summary: "GroupA Database Issue"
+                description: 'Cluster pg14-core-groupa (Pod {{ "{{" }} $labels.pod {{ "}}" }}) is reporting errors. Log count: {{ "{{" }} $values.B.Value {{ "}}" }}'
+              data:
+                - refId: "A"
+                  datasourceUid: "loki"
+                  queryType: "range"
+                  relativeTimeRange: { from: 900, to: 0 }
+                  model:
+                    editorMode: "code"
+                    expr: 'count_over_time({pod=~"pg14-core-groupa-.*"} |~ "(?i)(unhealthy|restart|panic|fatal|switchover|fencing|wal receiver process .* terminated)" [5m])'
+                    refId: "A"
+                - refId: "B"
+                  datasourceUid: "__expr__"
+                  queryType: "reduce"
+                  model: { expression: "A", reducer: "sum", refId: "B", type: "reduce" }
+                - refId: "C"
+                  datasourceUid: "__expr__"
+                  queryType: "math"
+                  model: { expression: "$B > 0", refId: "C", type: "math" }
+
+            # 5. CNPG GroupB
+            - uid: "cnpg_health_groupb"
+              title: "DB Health: Core GroupB"
+              condition: "C"
+              for: 0m
+              noDataState: OK
+              execErrState: Error
+              labels:
+                severity: "critical"
+                team: "devops"
+                env: "groupb"
+                db_cluster: "pg14-core-groupb"
+              annotations:
+                summary: "GroupB Database Issue"
+                description: 'Cluster pg14-core-groupb (Pod {{ "{{" }} $labels.pod {{ "}}" }}) is reporting errors. Log count: {{ "{{" }} $values.B.Value {{ "}}" }}'
+              data:
+                - refId: "A"
+                  datasourceUid: "loki"
+                  queryType: "range"
+                  relativeTimeRange: { from: 900, to: 0 }
+                  model:
+                    editorMode: "code"
+                    expr: 'count_over_time({pod=~"pg14-core-groupb-.*"} |~ "(?i)(unhealthy|restart|panic|fatal|switchover|fencing|wal receiver process .* terminated)" [5m])'
+                    refId: "A"
+                - refId: "B"
+                  datasourceUid: "__expr__"
+                  queryType: "reduce"
+                  model: { expression: "A", reducer: "sum", refId: "B", type: "reduce" }
+                - refId: "C"
+                  datasourceUid: "__expr__"
+                  queryType: "math"
+                  model: { expression: "$B > 0", refId: "C", type: "math" }

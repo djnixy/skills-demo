@@ -1,0 +1,75 @@
+name: Apply ArgoCD Configuration - All
+
+on:
+  workflow_dispatch:
+    paths:
+      - 'argocd/applicationsets/**'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  apply-argocd:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@1af3b93e4f16b251a37c95b6c318534882772591 # v6.0.0
+
+      - name: Install kubectl
+        uses: azure/setup-kubectl@f632314644558e8011270c538a7c29e1cd4208a3 # v4.0.0
+
+      - name: Install doctl
+        uses: digitalocean/action-doctl@135ac0a7c4948a3d6d59b0d2d3a33990885e33d4 # v2.5.1
+        with:
+          token: ${{ secrets.DO_TOKEN }}
+
+      - name: Configure kubeconfig for demo-production-sg
+        continue-on-error: true
+        run: |
+          doctl kubernetes cluster kubeconfig save demo-production-sg
+          
+      - name: Apply ArgoCD ApplicationSets
+        continue-on-error: true
+        run: |
+          if [ -d argocd/applicationsets ]; then
+            echo "Applying ArgoCD ApplicationSets..."
+            
+            # Find all .yaml files, but:
+            # 1. Exclude paths containing 'credentials'
+            # 2. Exclude paths containing 'database'
+            # 3. Exclude paths containing 'cnpg'
+            # 4. Exclude files starting with 'bws'
+            # 5. Exclude files starting with 'cnpg'
+            
+            find argocd/applicationsets -type f -name "*.yaml" \
+              -not -path "*/credentials/*" \
+              -not -path "*credential*" \
+              -not -path "*database*" \
+              -not -path "*cnpg*" \
+              -not -path "*/bws*" \
+              -not -path "*components*" \
+              -not -path "*value*" \
+              -not -name "bws*" \
+              -not -name "cnpg*" \
+              -not -name "*value*" \
+            | while read -r file; do
+              
+              # Skip empty files
+              if [ ! -s "$file" ]; then
+                echo "Skipping empty file: $file"
+                continue
+              fi
+
+              # Skip files that are comment-only or blank
+              if grep -qE '^[^#[:space:]]' "$file"; then
+                echo "Applying: $file"
+                kubectl apply -f "$file"
+              else
+                echo "Skipping comment-only or blank YAML: $file"
+              fi
+            done
+          fi

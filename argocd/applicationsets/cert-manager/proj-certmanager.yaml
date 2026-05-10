@@ -1,0 +1,21 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: jetstack-cert-manager
+  namespace: argocd
+spec:
+  description: Project for deploying jetstack/cert-manager across clusters
+  sourceRepos:
+    - https://charts.jetstack.io
+    - https://github.com/djnixy/my-gitops-infra-stack
+  destinations:
+    - namespace: 'kube-system'
+      server: '*'
+    - namespace: 'cert-manager'
+      server: '*'
+  clusterResourceWhitelist:
+    - group: "*"
+      kind: "*"
+  namespaceResourceWhitelist:
+    - group: "*"
+      kind: "*"
