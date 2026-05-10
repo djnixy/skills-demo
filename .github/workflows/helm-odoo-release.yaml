@@ -1,0 +1,31 @@
+name: Release Odoo Chart
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  publish:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      
+      - name: Login to GHCR
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | helm registry login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Package and Push
+        run: |
+          CHART_PATH="helm/charts/odoo"
+          CHART_NAME=$(basename $CHART_PATH)
+          echo "Processing chart: $CHART_NAME"
+          
+          helm package $CHART_PATH
+          helm push ${CHART_NAME}-*.tgz oci://ghcr.io/djnixy/charts
