@@ -16,8 +16,8 @@ jobs:
   apply-argocd:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@1af3b93e4f16b251a37c95b6c318534882772591 # v6.0.0
+      - name: Checkout Repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Install kubectl
         uses: azure/setup-kubectl@f632314644558e8011270c538a7c29e1cd4208a3 # v4.0.0
