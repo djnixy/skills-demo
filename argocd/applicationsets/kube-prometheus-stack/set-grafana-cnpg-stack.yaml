@@ -5,8 +5,6 @@ metadata:
   namespace: argocd
 spec:
   goTemplate: true
-  # syncPolicy:
-  #   preserveResourcesOnDeletion: true
   generators:
     - list:
         elements:
@@ -42,9 +40,7 @@ spec:
             memoryLimit: "200Mi"
             storageSize: "1Gi"
             enablePodMonitor: "false"
-            # --- Scheduling Variables ---
-            # IF YOU DO NOT WANT AFFINITY:
-            # Simply remove or comment out the two lines below.
+            # If affinity is needed, add the values below.
             affinityKey: ""
             affinityValue: ""
             

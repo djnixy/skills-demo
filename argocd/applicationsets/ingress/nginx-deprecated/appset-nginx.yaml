@@ -73,7 +73,6 @@ spec:
               #   prometheus.io/port: "10254"
 
               config:
-                # proxy-body-size: "3000m"
                 server-tokens: "false"
                 ssl-protocols: "TLSv1.2 TLSv1.3"
                 ssl-ciphers: "ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384"
@@ -86,50 +85,6 @@ spec:
                 proxy-buffer-size: "128k"
                 proxy-buffers: "4 256k"
                 proxy-busy-buffers-size: "256k"
-                # enable-modsecurity: "true"
-                # Update ModSecurity config and rules
-                # modsecurity-snippet: |
-                  # # this enables the mod security nextcloud plugin
-                  # Include /etc/nginx/owasp-modsecurity-crs/plugins/nextcloud-rule-exclusions-before.conf
-
-                  # # this enables the default OWASP Core Rule Set
-                  # Include /etc/nginx/owasp-modsecurity-crs/nginx-modsecurity.conf
-
-                  # # Enable prevention mode. Options: DetectionOnly,On,Off (default is DetectionOnly)
-                  # SecRuleEngine On
-
-                  # # Enable scanning of the request body
-                  # SecRequestBodyAccess On
-
-                  # # Enable XML and JSON parsing
-                  # SecRule REQUEST_HEADERS:Content-Type "(?:text|application(?:/soap\+|/)|application/xml)/" \
-                  #   "id:200000,phase:1,t:none,t:lowercase,pass,nolog,ctl:requestBodyProcessor=XML"
-
-                  # SecRule REQUEST_HEADERS:Content-Type "application/json" \
-                  #   "id:200001,phase:1,t:none,t:lowercase,pass,nolog,ctl:requestBodyProcessor=JSON"
-
-                  # # Reject if larger (we could also let it pass with ProcessPartial)
-                  # SecRequestBodyLimitAction Reject
-
-                  # # Send ModSecurity audit logs to the stdout (only for rejected requests)
-                  # SecAuditLog /dev/stdout
-
-                  # # format the logs in JSON
-                  # SecAuditLogFormat JSON
-
-                  # # could be On/Off/RelevantOnly
-                  # SecAuditEngine RelevantOnly
-
-              # Add a volume for the plugins directory
-              # extraVolumes:
-              #   - name: plugins
-              #     configMap:
-              #       name: modsecurity-plugins
-
-              # # override the /etc/nginx/enable-owasp-modsecurity-crs/plugins with your ConfigMap
-              # extraVolumeMounts:
-              #   - name: plugins
-              #     mountPath: /etc/nginx/owasp-modsecurity-crs/plugins
 
       destination:
         name: '{{cluster}}'

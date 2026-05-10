@@ -44,7 +44,7 @@ jobs:
             # 3. Exclude paths containing 'cnpg'
             # 4. Exclude files starting with 'bws'
             # 5. Exclude files starting with 'cnpg'
-            
+
             find argocd/applicationsets -type f -name "*.yaml" \
               -not -path "*/credentials/*" \
               -not -path "*credential*" \
