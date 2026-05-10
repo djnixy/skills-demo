@@ -18,10 +18,10 @@ spec:
             # --- Bitwarden Secret Variables ---
             BwAuthTokenSecretName: bwsmma-auth-token-monitoring
 
-            BwSuperUserSecretUserNameId: 00e5c635-9784-4c45-8283-b347005edf00
-            BwSuperUserSecretUserPasswordId: f2b8d525-b779-42c8-9580-b347005eaa1e
-            BwUserSecretUserNameId: 9f412f21-31b7-490e-ba9f-b347005efc5b
-            BwUserSecretUserPasswordId: 33f06dab-95be-4026-9681-b347005f1bae
+            BwSuperUserSecretUserNameId: efdf2d15-589b-4acc-ad49-a050fc86266a
+            BwSuperUserSecretUserPasswordId: f1014da3-60f1-4011-86e2-916f5a65ba30
+            BwUserSecretUserNameId: d70a2df7-f8cc-427f-9bec-90eacf506d11
+            BwUserSecretUserPasswordId: 7a00a384-6a91-4aa6-ae31-897848530e75
 
             # --- CNPG Cluster Variables ---
             clusterDescription: "PostgreSQL 14 database cluster"

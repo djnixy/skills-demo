@@ -12,23 +12,23 @@ spec:
             cluster: do-sgp1-demo-nonprod-sg
             authTokenSecretName: bwsmma-auth-token-external-dns
             secretKeyName1: aws_access_key_id
-            bwSecretId1: 647a5cde-bde8-4ffa-a90e-b38b002d9f05
+            bwSecretId1: c7846271-7613-4346-a028-ba0f8a28e860
             secretKeyName2: aws_secret_access_key
-            bwSecretId2: a3fd1983-1ffb-44eb-aa5f-b38b002dcbdb
+            bwSecretId2: b04078ea-062e-453c-a8b0-e50f02c0a72d
           - name: external-dns-aws-prod-sg
             cluster: do-sgp1-demo-production-sg
             authTokenSecretName: bwsmma-auth-token-external-dns
             secretKeyName1: aws_access_key_id
-            bwSecretId1: 647a5cde-bde8-4ffa-a90e-b38b002d9f05
+            bwSecretId1: c7846271-7613-4346-a028-ba0f8a28e860
             secretKeyName2: aws_secret_access_key
-            bwSecretId2: a3fd1983-1ffb-44eb-aa5f-b38b002dcbdb
+            bwSecretId2: b04078ea-062e-453c-a8b0-e50f02c0a72d
           - name: external-dns-aws-prod-au
             cluster: do-syd1-demo-production-au
             authTokenSecretName: bwsmma-auth-token-external-dns
             secretKeyName1: aws_access_key_id
-            bwSecretId1: 647a5cde-bde8-4ffa-a90e-b38b002d9f05
+            bwSecretId1: c7846271-7613-4346-a028-ba0f8a28e860
             secretKeyName2: aws_secret_access_key
-            bwSecretId2: a3fd1983-1ffb-44eb-aa5f-b38b002dcbdb
+            bwSecretId2: b04078ea-062e-453c-a8b0-e50f02c0a72d
   template:
     metadata:
       name: "{{name}}"
