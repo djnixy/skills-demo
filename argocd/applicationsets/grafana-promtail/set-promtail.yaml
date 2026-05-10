@@ -26,16 +26,6 @@ spec:
             bwSecretId1: fa87bdf3-6d07-47b3-a9b8-ac913b415caa 
             secretKeyName2: loki_password
             bwSecretId2: 95918c26-607f-4573-b51f-1205b805d591
-
-          - name: promtail-production-au
-            cluster: do-syd1-demo-production-au
-            memoryRequest: "100Mi" 
-
-            authTokenSecretName: bwsmma-auth-token-monitoring
-            secretKeyName1: loki_username
-            bwSecretId1: fa87bdf3-6d07-47b3-a9b8-ac913b415caa 
-            secretKeyName2: loki_password
-            bwSecretId2: 95918c26-607f-4573-b51f-1205b805d591
   template:
     metadata:
       name: '{{name}}'
@@ -43,7 +33,6 @@ spec:
       project: grafana-promtail
       revisionHistoryLimit: 2
       sources:
-        # 1. Inject Credentials via Bitwarden/ExternalSecrets
         - repoURL: https://github.com/djnixy/my-gitops-infra-stack
           targetRevision: HEAD
           path: argocd/applicationsets/grafana-promtail/credentials
