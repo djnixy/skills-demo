@@ -2,11 +2,11 @@ name: Terraform Plan - DO Droplet
 
 on:
   workflow_dispatch:
-  inputs:
-    do_token:
-      description: "DigitalOcean API token"
-      required: true
-      type: string
+    inputs:
+      do_token:
+        description: "DigitalOcean API token"
+        required: true
+        type: string
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
