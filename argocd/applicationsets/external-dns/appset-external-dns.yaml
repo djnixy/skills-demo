@@ -22,13 +22,6 @@ spec:
             bwSecretId1: c7846271-7613-4346-a028-ba0f8a28e860
             secretKeyName2: aws_secret_access_key
             bwSecretId2: b04078ea-062e-453c-a8b0-e50f02c0a72d
-          - name: external-dns-aws-prod-au
-            cluster: do-syd1-demo-production-au
-            authTokenSecretName: bwsmma-auth-token-external-dns
-            secretKeyName1: aws_access_key_id
-            bwSecretId1: c7846271-7613-4346-a028-ba0f8a28e860
-            secretKeyName2: aws_secret_access_key
-            bwSecretId2: b04078ea-062e-453c-a8b0-e50f02c0a72d
   template:
     metadata:
       name: "{{name}}"
@@ -58,7 +51,6 @@ spec:
                   kind: BitwardenSecret
                   name: placeholder
 
-        # --- External-DNS chart ---
         - repoURL: https://kubernetes-sigs.github.io/external-dns/
           chart: external-dns
           targetRevision: 1.19.0

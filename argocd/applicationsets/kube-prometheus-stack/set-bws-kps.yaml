@@ -7,59 +7,31 @@ spec:
   generators:
     - list:
         elements:
-          - name: bws-kps-nonprod-sg
-            cluster: do-sgp1-demo-nonprod-sg
-            
-            # --- BITWARDEN SECRET MAPPING ---
-            authTokenSecretName: bwsmma-auth-token-monitoring
-            # 1. Grafana Admin
-            secretKeyName1: grafana_admin_user
-            bwSecretId1: 9cd23013-4b13-4c91-9a43-7465b4abbe5b
-            secretKeyName2: grafana_admin_password
-            bwSecretId2: 11bc0fbc-96ae-48bf-8657-a2d058fe100d
-            
-            # 2. AWS SES (SMTP)
-            secretKeyName3: aws_ses_access_id
-            bwSecretId3: cb68bd61-79e8-44e5-8fa3-10326c134848
-
-            secretKeyName4: aws_ses_secret_key
-            bwSecretId4: b3659d41-6892-4a0b-81ef-60ca507621d8
-            
-            # 3. Datasource Passwords
-            secretKeyName5: basic_auth_username
-            bwSecretId5: fa87bdf3-6d07-47b3-a9b8-ac913b415caa
-            secretKeyName6: basic_auth_password
-            bwSecretId6: 95918c26-607f-4573-b51f-1205b805d591
-            
-            # 4. Prometheus Ingress Auth (Full htpasswd content)
-            secretKeyName7: auth
-            bwSecretId7: ac96dd32-8799-4960-a8b2-27be17d545b8
-
           - name: bws-kps-prod-sg
             cluster: do-sgp1-demo-production-sg
             
             # --- BITWARDEN SECRET MAPPING ---
             authTokenSecretName: bwsmma-auth-token-monitoring
-            # 1. Grafana Admin
+            # Grafana Admin Credentials
             secretKeyName1: grafana_admin_user
             bwSecretId1: 9cd23013-4b13-4c91-9a43-7465b4abbe5b
             secretKeyName2: grafana_admin_password
             bwSecretId2: 11bc0fbc-96ae-48bf-8657-a2d058fe100d
             
-            # 2. AWS SES (SMTP)
+            # AWS SES (SMTP)
             secretKeyName3: aws_ses_access_id
             bwSecretId3: cb68bd61-79e8-44e5-8fa3-10326c134848
 
             secretKeyName4: aws_ses_secret_key
             bwSecretId4: b3659d41-6892-4a0b-81ef-60ca507621d8
             
-            # 3. Datasource Passwords
+            # Datasource Passwords
             secretKeyName5: basic_auth_username
             bwSecretId5: fa87bdf3-6d07-47b3-a9b8-ac913b415caa
             secretKeyName6: basic_auth_password
             bwSecretId6: 95918c26-607f-4573-b51f-1205b805d591
             
-            # 4. Prometheus Ingress Auth (Full htpasswd content)
+            # Prometheus Ingress Auth (Full htpasswd content)
             secretKeyName7: auth
             bwSecretId7: ac96dd32-8799-4960-a8b2-27be17d545b8
 
@@ -73,34 +45,7 @@ spec:
             bwSecretId10: 0fb4a3a9-268a-41e0-b76d-589e21ed1a91
             secretKeyName11: grafana_db_password
             bwSecretId11: 7b0f8234-f481-4de0-91a5-c35fa1c01973
-
-          - name: bws-kps-prod-au
-            cluster: do-syd1-demo-production-au
             
-            # --- BITWARDEN SECRET MAPPING ---
-            authTokenSecretName: bwsmma-auth-token-monitoring
-            # 1. Grafana Admin
-            secretKeyName1: grafana_admin_user
-            bwSecretId1: 9cd23013-4b13-4c91-9a43-7465b4abbe5b
-            secretKeyName2: grafana_admin_password
-            bwSecretId2: 11bc0fbc-96ae-48bf-8657-a2d058fe100d
-            
-            # 2. AWS SES (SMTP)
-            secretKeyName3: aws_ses_access_id
-            bwSecretId3: cb68bd61-79e8-44e5-8fa3-10326c134848
-
-            secretKeyName4: aws_ses_secret_key
-            bwSecretId4: b3659d41-6892-4a0b-81ef-60ca507621d8
-            
-            # 3. Datasource Passwords
-            secretKeyName5: basic_auth_username
-            bwSecretId5: fa87bdf3-6d07-47b3-a9b8-ac913b415caa
-            secretKeyName6: basic_auth_password
-            bwSecretId6: 95918c26-607f-4573-b51f-1205b805d591
-            
-            # 4. Prometheus Ingress Auth (Full htpasswd content)
-            secretKeyName7: auth
-            bwSecretId7: ac96dd32-8799-4960-a8b2-27be17d545b8
   template:
     metadata:
       name: '{{name}}'

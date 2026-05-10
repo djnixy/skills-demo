@@ -1,7 +1,4 @@
 #!/bin/bash
-# ----------------------------------------------------
-# PART 1: BASE SYSTEM SETUP
-# ----------------------------------------------------
 
 # Notify start
 curl -d "Step 1: Base setup started (User: ubuntu)..." ntfy.sh/demo
