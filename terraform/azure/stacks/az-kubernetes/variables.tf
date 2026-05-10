@@ -1,6 +1,6 @@
 # variable "subscription_id" {}
 
-# variable "productName" {
+# variable "projectName" {
 #   # description = ""
 #   type        = string
 #   default = ""
@@ -61,16 +61,16 @@
 #   #   Owner   = local.owner
 #   # }
 
-#     rgName          = join("-", ["rg", var.productName, var.env])
-#     rgSharedName    = join("-", ["rg", var.productName, "shared"])
-#     vnetName        = join("-", ["vnet", var.productName, var.env])
-#     planName        = join("-", ["plan", var.productName, var.env])
-#     appName         = join("-", ["app", var.productName, var.serviceName, var.env])
-#     appName1        = join("-", ["app", var.productName, var.serviceName1, var.env])
-#     acrName         = var.productName
+#     rgName          = join("-", ["rg", var.projectName, var.env])
+#     rgSharedName    = join("-", ["rg", var.projectName, "shared"])
+#     vnetName        = join("-", ["vnet", var.projectName, var.env])
+#     planName        = join("-", ["plan", var.projectName, var.env])
+#     appName         = join("-", ["app", var.projectName, var.serviceName, var.env])
+#     appName1        = join("-", ["app", var.projectName, var.serviceName1, var.env])
+#     acrName         = var.projectName
 
-#     sqlServerName   = join("-", ["sql", var.productName, var.env]) 
-#     sqlPoolName     = join("-", ["pool", var.productName, var.env])
+#     sqlServerName   = join("-", ["sql", var.projectName, var.env]) 
+#     sqlPoolName     = join("-", ["pool", var.projectName, var.env])
 #     sqlDBName       = join("-", ["sqldb", var.databaseName , var.env])
 #     sqlDBName1      = join("-", ["sqldb", var.databaseName1 , var.env])
 # }

@@ -1,7 +1,7 @@
 generate_hcl "_terramate_generated_variables.tf" {
   content {
 
-variable "product_name" {
+variable "project_name" {
   # description = ""
   type        = string
   default = "demonix"

@@ -13,7 +13,7 @@ data "http" "myip" {
   url = "http://ipv4.icanhazip.com"
 }
 
-variable "product_name" {
+variable "project_name" {
   # description = "CIDR block for VPC"
   type        = string
   default = ""
@@ -90,21 +90,21 @@ locals {
   #   Owner   = local.owner
   # }
 
-  alb_sg_name = join("-", ["alb", var.product_name, var.environment , "sg"])
-  alb_name = join("-", ["alb", var.product_name, var.environment])
+  alb_sg_name = join("-", ["alb", var.project_name, var.environment , "sg"])
+  alb_name = join("-", ["alb", var.project_name, var.environment])
 
-  ecs_sg_frontend_name = join("-", ["ecs", var.product_name, "fe", var.environment , "sg"])
-  ecs_sg_backend_name = join("-", ["ecs", var.product_name, "be", var.environment , "sg"])
+  ecs_sg_frontend_name = join("-", ["ecs", var.project_name, "fe", var.environment , "sg"])
+  ecs_sg_backend_name = join("-", ["ecs", var.project_name, "be", var.environment , "sg"])
 
-  rds_sg_name = join("-", ["rds", var.product_name, var.environment , "sg"])
+  rds_sg_name = join("-", ["rds", var.project_name, var.environment , "sg"])
 
-  tg_frontend_name =join("-", ["tg", var.product_name, "fe", var.environment])
-  tg_backend_name = join("-", ["tg", var.product_name, "be", var.environment])
+  tg_frontend_name =join("-", ["tg", var.project_name, "fe", var.environment])
+  tg_backend_name = join("-", ["tg", var.project_name, "be", var.environment])
 
-  cluster_name = join("-", [var.product_name, var.environment])
-  service_frontend_name= join("-", ["service", var.product_name, "fe", var.environment])
-  service_backend_name= join("-", ["service", var.product_name, "be", var.environment])
+  cluster_name = join("-", [var.project_name, var.environment])
+  service_frontend_name= join("-", ["service", var.project_name, "fe", var.environment])
+  service_backend_name= join("-", ["service", var.project_name, "be", var.environment])
 
-  td_frontend= join("-", [var.product_name, "fe", var.environment])
-  td_backend= join("-", [var.product_name, "be", var.environment])
+  td_frontend= join("-", [var.project_name, "fe", var.environment])
+  td_backend= join("-", [var.project_name, "be", var.environment])
 }

@@ -2,7 +2,7 @@ module "eks" {
   source  = "terraform-aws-modules/eks/aws"
   version = "20.22.0"
 
-  cluster_name    = var.product_name
+  cluster_name    = var.project_name
   cluster_upgrade_policy = {
     support_type = "STANDARD"
   }

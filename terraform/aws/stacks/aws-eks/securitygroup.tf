@@ -1,5 +1,5 @@
 resource "aws_security_group" "additional" {
-  name_prefix = "${var.product_name}-additional"
+  name_prefix = "${var.project_name}-additional"
   description = "Allow remote SSH access"
   vpc_id      = module.vpc.vpc_id
 

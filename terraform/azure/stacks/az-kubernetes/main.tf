@@ -56,7 +56,7 @@ module "aks" {
   ]
 
   prefix              = "prefix-${random_id.prefix.hex}"
-  cluster_name        = join("-", ["aks", var.product_name, var.environment])
+  cluster_name        = join("-", ["aks", var.project_name, var.environment])
   resource_group_name = azurerm_resource_group.this.name
   # location = "eastus2"
   os_disk_size_gb                   = 50

@@ -1,4 +1,4 @@
-variable "product_name" {
+variable "project_name" {
   # description = ""
   type    = string
   default = ""
@@ -59,15 +59,15 @@ locals {
   #   Owner   = local.owner
   # }
 
-  rg_name         = join("-", ["rg", var.product_name, var.env])
-  rg_shared_name  = join("-", ["rg", var.product_name, "shared"])
-  plan_name       = join("-", ["plan", var.product_name, var.env])
-  app_name        = join("-", ["app", var.product_name, var.service_name, var.env])
-  app_name1       = join("-", ["app", var.product_name, var.service_name1, var.env])
-  acr_name        = var.product_name
+  rg_name         = join("-", ["rg", var.project_name, var.env])
+  rg_shared_name  = join("-", ["rg", var.project_name, "shared"])
+  plan_name       = join("-", ["plan", var.project_name, var.env])
+  app_name        = join("-", ["app", var.project_name, var.service_name, var.env])
+  app_name1       = join("-", ["app", var.project_name, var.service_name1, var.env])
+  acr_name        = var.project_name
 
-  sql_server_name = join("-", ["sql", var.product_name, var.env])
-  sql_pool_name   = join("-", ["pool", var.product_name, var.env])
+  sql_server_name = join("-", ["sql", var.project_name, var.env])
+  sql_pool_name   = join("-", ["pool", var.project_name, var.env])
   sql_db_name     = join("-", ["sqldb", var.database_name, var.env])
   sql_db_name1    = join("-", ["sqldb", var.database_name1, var.env])
 }

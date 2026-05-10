@@ -17,7 +17,7 @@ variable "app_count" {
 
 
 locals {
-  lambda_function_name      = join("-", ["lambda", var.product_name])
-  aws_cloudwatch_event_rule = var.product_name
-  sns_name                  = var.product_name
+  lambda_function_name      = join("-", ["lambda", var.project_name])
+  aws_cloudwatch_event_rule = var.project_name
+  sns_name                  = var.project_name
 }
