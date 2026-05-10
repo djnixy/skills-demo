@@ -70,7 +70,7 @@
         - niki
         - guest
 
-    - name: Ensure sudo group has passwordless sudo
+    - name: Setup passwordless sudo for sudo group
       ansible.builtin.lineinfile:
         path: /etc/sudoers
         state: present
