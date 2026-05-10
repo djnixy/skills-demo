@@ -2,12 +2,7 @@ name: Terraform Plan - DO Droplet
 
 on:
   workflow_dispatch:
-    inputs:
-      do_token:
-        description: "DigitalOcean API token"
-        required: true
-        type: string
-        
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: false
@@ -24,7 +19,7 @@ jobs:
         working-directory: terraform/DigitalOcean/droplet
 
     env:
-      TF_VAR_do_token: ${{ inputs.do_token }}
+      TF_VAR_do_token: ${{ secrets.DO_TOKEN }}
       TF_VAR_region: "sgp1"
       TF_VAR_droplet_size: "s-1vcpu-1gb"
       TF_VAR_image_slug: "ubuntu-24-04-x64"
