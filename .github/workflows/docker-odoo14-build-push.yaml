@@ -1,0 +1,45 @@
+name: Build and Push Docker Image for Odoo 14
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'docker/odoo14/**'
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build-and-push-odoo14:
+    runs-on: ubuntu-latest
+    env:
+      PG_VERSION: pg14
+      DOCKERFILE: Dockerfile.bullseye.pg14
+      CONTEXT_PATH: "14.0"
+          
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Log in to GHCR
+        uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4.1.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Set date
+        id: vars
+        run: echo "date=$(date +'%Y.%m.%d')" >> $GITHUB_OUTPUT
+      - name: Build and push
+        uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f # v7.1.0
+        with:
+          context: ${{ env.CONTEXT_PATH }}
+          file: ${{ env.CONTEXT_PATH }}/${{ env.DOCKERFILE }}
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/odoo14:${{ env.PG_VERSION }}-latest
+            ghcr.io/${{ github.repository_owner }}/odoo14:${{ env.PG_VERSION }}-build-${{ steps.vars.outputs.date }}.${{ github.run_number }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

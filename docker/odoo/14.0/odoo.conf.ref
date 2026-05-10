@@ -1,0 +1,31 @@
+[options]
+addons_path = /mnt/extra-addons
+data_dir = /var/lib/odoo
+admin_passwd = NotSecurePasswordPlease8123CHANGEME!
+db_maxconn = 64
+; db_name = False
+; dbfilter = .*
+; 536870912 = 512 MB
+; 1073741824 = 1 GB
+; 1503238553 = 1.4 GB
+limit_memory_soft = 536870912
+limit_memory_hard = 1073741824
+limit_request = 8192
+limit_time_cpu = 60
+limit_time_real = 170
+list_db = True
+log_db = False
+; log_handler = [':INFO']
+log_level = warn
+logfile = None
+max_cron_threads = 1
+; osv_memory_age_limit = 1.0
+; osv_memory_count_limit = False
+workers = 0
+redis_session = True
+;redis_host = 
+redis_host = 
+redis_port = 6379
+; default 5 days
+; 1 month 2592000
+redis_expire = 604800

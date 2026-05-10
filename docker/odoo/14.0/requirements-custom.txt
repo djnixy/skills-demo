@@ -1,0 +1,49 @@
+activecampaign
+activecampaign-python
+adyen
+azure-core >= 1.32.0 # hard requirement
+azure-eventhub >= 5.13.0 # hard requirement
+azure-iot-device >= 2.14.0 # hard requirement
+bcrypt
+boto3==1.7.84
+botocore==1.10.84 # depends on lower version of urllib3 but not acceptable to downgrade urllib3
+certifi >= 2024.12.14 # hard requirement
+cffi
+charset-normalizer >= 3.4.0  # hard requirement
+cython
+deprecation >= 2.1.0  # hard requirement
+et-xmlfile
+future
+geographiclib
+geopy
+googlemaps
+idna >=3.10 # hard requirement
+janus >=1.0.0 # hard requirement
+joblib
+numpy==1.21.6 # hard requirement
+openpyxl
+packaging >= 24.2 # hard requirement
+paho-mqtt >= 1.6.1 # hard requirement
+pandas
+paramiko
+parsedatetime
+patsy
+phonenumbers
+pmdarima
+PySocks >= 1.7.1  # hard requirement
+pyPEG2 == 2.15.2
+redis >= 6.0.0
+requests >=2.32.3 # hard requirement
+requests-oauthlib
+requests-unixsocket2 >= 0.4.2 # hard requirement
+schema
+scikit-learn
+scipy
+six >= 1.17.0 # hard requirement
+sqlite-bro
+statsmodels >= 0.13.5
+threadpoolctl
+twilio
+typing_extensions >= 4.12.2 # hard requirement
+urllib3 >= 2.2.3 # hard requirement
+werkzeug
