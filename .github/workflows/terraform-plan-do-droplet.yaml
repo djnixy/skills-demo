@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: terraform/DigitalOcean
+        working-directory: terraform/DigitalOcean/droplet
 
     env:
       TF_VAR_do_token: ${{ inputs.do_token }}
