@@ -33,7 +33,7 @@ RUN apt-get update && \
         libxslt1-dev \
         libldap2-dev \
         libsasl2-dev \
-        libtiff5-dev \
+        libtiff-dev \
         libjpeg-dev \
         libopenjp2-7-dev \
         zlib1g-dev \
@@ -53,7 +53,7 @@ RUN apt-get update && \
         python3-pdfminer \
         python3-pip \
         python3-phonenumbers \
-        python3-pyldap \
+        python3-ldap \
         python3-qrcode \
         python3-renderpm \
         python3-setuptools \
