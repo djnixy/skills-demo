@@ -1,0 +1,60 @@
+---
+- name: Setup FileBrowser Service
+  hosts: localhost  # Change this to your target hosts
+  become: yes
+
+  tasks:
+    - name: Ensure /srv/filebrowser directory exists
+      file:
+        path: /srv/filebrowser
+        state: directory
+        mode: '0755'
+
+    - name: Create compose.yml for FileBrowser
+      copy:
+        dest: /srv/filebrowser/compose.yml
+        content: |
+          services:
+            filebrowser:
+              image: filebrowser/filebrowser
+              container_name: file-browser
+              # user: 1000:1000
+              restart: always
+              ports:
+                - "7001:80"
+              volumes:
+                - /srv/filebrowser/filebrowser.db:/home/database.db
+                - /srv/filebrowser/filebrowser.json:/.filebrowser.json
+                - /var/www//wordpressdemo.nixy.vip/wordpress/wp-content/ai1wm-backups/:/data/wp
+        mode: '0644'
+
+    - name: Create filebrowser.json configuration file
+      copy:
+        dest: /srv/filebrowser/filebrowser.json
+        content: |
+          {
+              "port": 80,
+              "baseURL": "",
+              "address": "",
+              "log": "stdout",
+              "database": "/home/database.db",
+              "root": "/data"
+          }
+        mode: '0644'
+
+    - name: Create an empty filebrowser.db file
+      file:
+        path: /srv/filebrowser/filebrowser.db
+        state: touch
+        mode: '0644'
+
+    - name: Run docker compose up -d
+      command: docker compose up -d
+      args:
+        chdir: /srv/filebrowser
+      register: compose_up_result
+      ignore_errors: yes
+
+    - name: Display Docker Compose output
+      debug:
+        var: compose_up_result.stdout_lines

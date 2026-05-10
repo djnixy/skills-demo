@@ -1,0 +1,108 @@
+---
+- name: Install Nginx, Zabbix Server, Postgres, and Zabbix Agent
+  hosts: localhost
+  become: true
+  vars:
+    setup_zabbix_server: true  # Set to false to skip all tasks
+    domain_name: zabbix.nixy.vip  # Nginx will be configured for this domain
+    zabbix_repo: "http://repo.zabbix.com/zabbix/7.0/ubuntu"
+    postgres_user: zabbix  # PostgreSQL username
+    postgres_password: "your_custom_password"  # Customize the PostgreSQL user password here
+
+  pre_tasks:
+    - name: Check if Zabbix Server setup is enabled
+      assert:
+        that: setup_zabbix_server
+        msg: "Skipping playbook as setup_zabbix_server is false."
+      when: not setup_zabbix_server
+
+    - name: Set distribution-specific variables
+      set_fact:
+        postgres_version: "{{ '14' if ansible_distribution_release in ['jammy', 'noble'] else '15' }}"
+      when: ansible_distribution_release in ['jammy', 'noble', 'kinetic']
+
+  tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+
+    - name: Upgrade all packages
+      apt:
+        upgrade: dist
+
+    - name: Install latest Nginx
+      apt:
+        name: nginx
+        state: latest
+
+    - name: Install Certbot for Let's Encrypt
+      apt:
+        name:
+          - certbot
+          - python3-certbot-nginx
+        state: present
+
+    - name: Ensure Nginx is enabled and started
+      service:
+        name: nginx
+        state: started
+        enabled: yes
+
+    - name: Install Postgres based on distribution
+      apt:
+        name: "postgresql-{{ postgres_version }}"
+        state: present
+
+    - name: Determine Ubuntu distribution codename
+      command: lsb_release -cs
+      register: distro_codename
+
+    - name: Add Zabbix GPG key
+      apt_key:
+        url: https://repo.zabbix.com/zabbix-official-repo.key
+        state: present
+
+    - name: Add Zabbix APT repository for Ubuntu
+      apt_repository:
+        repo: "deb [arch=amd64] {{ zabbix_repo }} {{ distro_codename.stdout }} main"
+        state: present
+
+    - name: Install Zabbix Server, Web Frontend, and Agent
+      apt:
+        name:
+          - zabbix-server-pgsql
+          - zabbix-frontend-php
+          - zabbix-apache-conf
+          - zabbix-agent
+          - postgresql
+          - postgresql-contrib
+        state: present
+      when: setup_zabbix_server
+
+    - name: Create Zabbix database
+      command: sudo -u postgres psql -c "CREATE DATABASE zabbix;"
+      when: setup_zabbix_server
+
+    - name: Create Zabbix database user
+      command: sudo -u postgres psql -c "CREATE USER zabbix WITH PASSWORD '{{ postgres_password }}';"
+      when: setup_zabbix_server
+
+    - name: Import initial schema
+      command: "zcat /usr/share/zabbix-sql-scripts/postgresql/server.sql.gz | sudo -u zabbix psql zabbix"
+      when: setup_zabbix_server
+
+    - name: Install Zabbix Agent (active mode)
+      apt:
+        name: zabbix-agent
+        state: present
+
+    - name: Configure Zabbix Agent for active mode
+      lineinfile:
+        path: /etc/zabbix/zabbix_agentd.conf
+        regexp: '^ServerActive='
+        line: 'ServerActive=127.0.0.1'
+
+    - name: Restart Zabbix Agent
+      service:
+        name: zabbix-agent
+        state: restarted

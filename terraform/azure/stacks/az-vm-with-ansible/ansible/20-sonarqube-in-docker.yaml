@@ -1,0 +1,69 @@
+- name: Setting Up SonarQube
+  hosts: localhost
+  become: yes
+  vars:
+    setup_sonarqube: false | bool
+    docker_compose_yaml: |
+      services:
+        sonarqube:
+          image: sonarqube:community
+          depends_on:
+            - db
+          environment:
+            SONAR_JDBC_URL: jdbc:postgresql://db:5432/sonar
+            SONAR_JDBC_USERNAME: sonar
+            SONAR_JDBC_PASSWORD: sonar
+          volumes:
+            - sonarqube_data:/opt/sonarqube/data
+            - sonarqube_extensions:/opt/sonarqube/extensions
+            - sonarqube_logs:/opt/sonarqube/logs
+          ports:
+            - "9000:9000"
+        db:
+          image: postgres:12
+          environment:
+            POSTGRES_USER: sonar
+            POSTGRES_PASSWORD: sonar
+          volumes:
+            - postgresql:/var/lib/postgresql
+            - postgresql_data:/var/lib/postgresql/data
+      volumes:
+        sonarqube_data:
+        sonarqube_extensions:
+        sonarqube_logs:
+        postgresql:
+        postgresql_data:
+  tasks:
+    - block:
+        - name: Create directory /srv/sonarqube
+          file:
+            path: /srv/sonarqube
+            state: directory
+            owner: ubuntu
+            group: ubuntu
+            mode: '0755'
+
+        - name: Set vm.max_map_count in sysctl
+          lineinfile:
+            path: /etc/sysctl.conf
+            line: 'vm.max_map_count=262144'
+            regexp: '^vm.max_map_count='
+
+        - name: Apply sysctl changes without reboot
+          command: sysctl -p
+
+        - name: Write Docker Compose file for SonarQube
+          copy:
+            dest: /srv/sonarqube/compose.yml
+            content: "{{ docker_compose_yaml }}"
+
+        - name: Run Docker Compose
+          command: docker compose -f /srv/sonarqube/compose.yml up -d
+
+        - name: Install required system packages
+          apt:
+            name: unzip
+            state: latest
+            update_cache: yes
+          
+      when: setup_sonarqube | bool  # Apply the condition to the entire block
