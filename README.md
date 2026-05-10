@@ -7,11 +7,15 @@ This repo serves as a reference and cheatsheet for myself and to show others wha
 
 ## What is in here?
 
-Terraform
+Terraform:
+  - AWS
+  - AZURE
+  - DIGITALOCEANS
+  - GKE (TODO)
 Ansible
 Docker
 Kubernetes
 Helm
-ArgoCD
-Bitwarden (Secrets Management)
+ArgoCD:
+  - Manifests for deploying on cluster
 

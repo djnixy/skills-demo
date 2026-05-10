@@ -2,13 +2,8 @@ terraform {
   required_providers {
     # https://registry.terraform.io/providers/hashicorp/azurerm/latest
     azurerm = {
-      source = "hashicorp/azurerm"
-      # version = "4.0.1"
-    }
-    # https://registry.terraform.io/providers/hashicorp/kubernetes/latest
-    kubernetes = {
-      source  = "hashicorp/kubernetes"
-      version = "~> 2.32.0"
+      source  = "hashicorp/azurerm"
+      version = "~> 4.72.0"
     }
   }
   required_version = ">= 1.9.3"
