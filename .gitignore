@@ -1,0 +1,25 @@
+# macOS
+.DS_Store
+
+# General
+node_modules/
+.env
+*.log
+
+# Terraform
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+*.tfvars
+*.tfvars.json
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraform.lock.hcl
+.terraformrc
+terraform.rc
+*.tfplan
+*tfplan*

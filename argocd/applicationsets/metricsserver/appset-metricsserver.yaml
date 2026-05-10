@@ -1,0 +1,63 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: metrics-server
+  namespace: argocd
+spec:
+  description: Project for deploying metrics-server across clusters
+  sourceRepos:
+    - https://kubernetes-sigs.github.io/metrics-server/*
+  destinations:
+    - namespace: '*'
+      server: '*'
+  clusterResourceWhitelist:
+    - group: "*"
+      kind: "*"
+  namespaceResourceWhitelist:
+    - group: "*"
+      kind: "*"
+
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: metrics-server
+  namespace: argocd
+spec:
+  generators:
+    - list:
+        elements:
+          - name: metrics-server-nonprod-sg
+            cluster: do-sgp1-demo-nonprod-sg
+          - name: metrics-server-prod-sg
+            cluster: do-sgp1-demo-production-sg
+          - name: metrics-server-prod-au
+            cluster: do-syd1-demo-production-au
+  template:
+    metadata:
+      name: '{{name}}'
+    spec:
+      project: metrics-server
+      revisionHistoryLimit: 2
+      source:
+        repoURL: https://kubernetes-sigs.github.io/metrics-server/
+        chart: metrics-server
+        targetRevision: 3.13.0
+        helm:
+          releaseName: 'metrics-server'
+          values: |
+            resources:
+              requests:
+                cpu: 50m
+                memory: 100Mi
+              limits:
+                memory: 100Mi
+      destination:
+        name: '{{cluster}}'
+        namespace: kube-system
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true

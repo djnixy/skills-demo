@@ -1,0 +1,29 @@
+# values-alerting-core.yaml
+grafana:
+  alerting:
+    policies.yaml:
+      apiVersion: 1
+      policies:
+        - orgId: 1
+          receiver: default_receiver
+    contactpoints.yaml:
+      secret:
+        apiVersion: 1
+        contactPoints:
+          - orgId: 1
+            name: default_receiver
+            receivers:
+              - uid: 'default_receiver'
+                type: email
+                settings:
+                  addresses: 'niki@demo.com,devops@demo.com'
+              - uid: 'ntfy_notifier'
+                type: webhook
+                settings:
+                  url: "https://ntfy.sh/demo?template=grafana"
+                  httpMethod: "POST"
+              - uid: 'argo_self_heal'
+                type: webhook
+                settings:
+                  url: "https://restart.tc.demo.com/restart"
+                  httpMethod: "POST"

@@ -1,0 +1,110 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: grafana-promtail
+  namespace: argocd
+spec:
+  generators:
+    - list:
+        elements:
+          - name: promtail-nonprod-sg
+            cluster: do-sgp1-demo-nonprod-sg
+            memoryRequest: "100Mi" 
+
+            authTokenSecretName: bwsmma-auth-token-monitoring
+            secretKeyName1: loki_username
+            bwSecretId1: fa87bdf3-6d07-47b3-a9b8-ac913b415caa 
+            secretKeyName2: loki_password
+            bwSecretId2: 95918c26-607f-4573-b51f-1205b805d591
+
+          - name: promtail-production-sg
+            cluster: do-sgp1-demo-production-sg
+            memoryRequest: "120Mi" 
+
+            authTokenSecretName: bwsmma-auth-token-monitoring
+            secretKeyName1: loki_username
+            bwSecretId1: fa87bdf3-6d07-47b3-a9b8-ac913b415caa 
+            secretKeyName2: loki_password
+            bwSecretId2: 95918c26-607f-4573-b51f-1205b805d591
+  template:
+    metadata:
+      name: '{{name}}'
+    spec:
+      project: grafana-promtail
+      revisionHistoryLimit: 2
+      sources:
+        - repoURL: https://github.com/djnixy/my-gitops-infra-stack
+          targetRevision: HEAD
+          path: argocd/applicationsets/grafana-promtail/credentials
+          kustomize:
+            patches:
+              - patch: |
+                  [
+                    { "op": "replace", "path": "/metadata/name", "value": "bws-{{name}}" },
+                    { "op": "replace", "path": "/spec/secretName", "value": "bws-{{name}}" },
+                    { "op": "replace", "path": "/spec/authToken/secretName", "value": "{{authTokenSecretName}}" },
+                    {
+                      "op": "replace",
+                      "path": "/spec/map",
+                      "value": [
+                        { "secretKeyName": "{{secretKeyName1}}", "bwSecretId": "{{bwSecretId1}}" },
+                        { "secretKeyName": "{{secretKeyName2}}", "bwSecretId": "{{bwSecretId2}}" }
+                      ]
+                    }
+                  ]
+                target:
+                  kind: BitwardenSecret
+                  name: placeholder
+        - repoURL: https://grafana.github.io/helm-charts
+          chart: promtail
+          targetRevision: 6.17.1
+          helm:
+            releaseName: 'promtail'
+            values: |
+              # deploy promtail to all nodes, no matter the labels
+              tolerations:
+                - operator: "Exists"
+
+              # Enable Env Var expansion in config
+              extraArgs:
+                - -config.expand-env=true
+
+              # Inject the credentials from the Secret created above
+              extraEnv:
+                - name: LOKI_USERNAME
+                  valueFrom:
+                    secretKeyRef:
+                      name: bws-{{name}}
+                      key: {{secretKeyName1}}
+                - name: LOKI_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: bws-{{name}}
+                      key: {{secretKeyName2}}
+                      
+              tolerations:
+                - operator: "Exists"
+              resources:
+                requests:
+                  memory: "{{memoryRequest}}"
+                limits:
+                  memory: "{{memoryRequest}}"
+              config:
+                clients:
+                  # - url: https://loki.tc.demo.com/loki/api/v1/push
+                  #   tenant_id: "1"
+                  - url: https://gateway.loki.tc.demo.com/loki/api/v1/push
+                    tenant_id: "2"
+                    # tenant_id: "main" # Arbitrary string (Loki auth_enabled=false ignores this, but Promtail likes it)
+                    basic_auth:
+                      username: "${LOKI_USERNAME}"
+                      password: "${LOKI_PASSWORD}"
+      destination:
+        name: '{{cluster}}'
+        namespace: monitoring
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true

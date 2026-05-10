@@ -1,0 +1,69 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: jetstack-cert-manager
+  namespace: argocd
+spec:
+  generators:
+    - list:
+        elements:
+          - name: certmanager-nonprod-sg
+            cluster: do-sgp1-demo-nonprod-sg
+          - name: certmanager-production-sg
+            cluster: do-sgp1-demo-production-sg
+          - name: certmanager-production-au
+            cluster: do-syd1-demo-production-au
+  template:
+    metadata:
+      name: '{{name}}'
+    spec:
+      project: jetstack-cert-manager
+      revisionHistoryLimit: 2
+      sources:
+        - repoURL: https://charts.jetstack.io
+          chart: cert-manager
+          targetRevision: 1.20.2
+          helm:
+            releaseName: 'cert-manager'
+            values: |
+              config:
+                featureGates:
+                  ACMEHTTP01IngressPathTypeExact: false
+              crds:
+                enabled: true
+              resources:
+                requests:
+                  memory: 80Mi
+                limits:
+                  memory: 80Mi
+              cainjector:
+                resources:
+                  requests:
+                    memory: 120Mi
+                  limits:
+                    memory: 120Mi
+              webhook:
+                resources:
+                  requests:
+                    memory: 30Mi
+                  limits:
+                    memory: 30Mi
+        - repoURL: https://github.com/djnixy/my-gitops-infra-stack
+          targetRevision: HEAD
+          path: argocd/applicationsets/cert-manager/config
+      destination:
+        name: '{{cluster}}'
+        namespace: cert-manager
+      # syncPolicy:
+      #   automated:
+      #     prune: true
+      #     selfHeal: true
+      #   syncOptions:
+      #     - CreateNamespace=true
+      #     - ServerSideApply=true
+      #   retry:
+      #     limit: 5
+      #     backoff:
+      #       duration: 5s
+      #       factor: 2
+      #       maxDuration: 3m

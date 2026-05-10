@@ -1,0 +1,21 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: kube-prometheus-stack
+  namespace: argocd
+spec:
+  description: Project for deploying kube-prometheus-stack via Helm using Argo CD
+  sourceRepos:
+    - https://prometheus-community.github.io/helm-charts
+    - https://github.com/djnixy/my-gitops-infra-stack
+  destinations:
+    - namespace: '*'
+      server: '*'
+  clusterResourceWhitelist:
+    - group: '*'
+      kind: '*'
+  namespaceResourceWhitelist:
+    - group: '*'
+      kind: '*'
+  orphanedResources:
+    warn: false

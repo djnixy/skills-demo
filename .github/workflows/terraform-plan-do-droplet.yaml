@@ -1,0 +1,47 @@
+name: Terraform Plan - DO Droplet
+
+on:
+  workflow_dispatch:
+  inputs:
+    do_token:
+      description: "DigitalOcean API token"
+      required: true
+      type: string
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  terraform-plan:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: terraform/DigitalOcean
+
+    env:
+      TF_VAR_do_token: ${{ inputs.do_token }}
+      TF_VAR_region: "sgp1"
+      TF_VAR_droplet_size: "s-1vcpu-1gb"
+      TF_VAR_image_slug: "ubuntu-24-04-x64"
+      TF_VAR_ssh_key_name: "niki-ed25519"
+      TF_VAR_project_name: "demo"
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@1af3b93e4f16b251a37c95b6c318534882772591 # v6.0.0
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3.1.2
+        with:
+          terraform_wrapper: false
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Plan
+        run: terraform plan -out=tfplan

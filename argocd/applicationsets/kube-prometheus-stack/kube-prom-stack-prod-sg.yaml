@@ -1,0 +1,355 @@
+## references:
+## https://github.com/grafana/helm-charts/blob/main/charts/grafana/values.yaml
+## https://github.com/prometheus-community/helm-charts/blob/main/charts/kube-prometheus-stack/values.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kps-prod-sg
+  namespace: argocd
+spec:
+  project: kube-prometheus-stack
+  revisionHistoryLimit: 3
+  source:
+    repoURL: https://prometheus-community.github.io/helm-charts
+    chart: kube-prometheus-stack
+    targetRevision: 79.7.1
+    helm:
+      releaseName: kps
+      values: |
+        fullnameOverride: kps
+
+        ### Start of Grafana ###
+        grafana:
+          enabled: true
+          admin:
+            existingSecret: "bws-kps-prod-sg"
+            userKey: grafana_admin_user
+            passwordKey: grafana_admin_password
+          resources:
+            requests:
+              memory: 800Mi
+            limits:
+              memory: 800Mi
+          # Map secrets to Env Vars so we can use ${VAR} in config
+          envValueFrom:
+            SMTP_USER:
+              secretKeyRef:
+                name: "bws-kps-prod-sg"
+                key: "aws_ses_access_id"
+            SMTP_PASSWORD:
+              secretKeyRef:
+                name: "bws-kps-prod-sg"
+                key: "aws_ses_secret_key"
+            BASIC_AUTH_USERNAME:
+              secretKeyRef:
+                name: "bws-kps-prod-sg"
+                key: "basic_auth_username"
+            BASIC_AUTH_PASSWORD:
+              secretKeyRef:
+                name: "bws-kps-prod-sg"
+                key: "basic_auth_password"
+
+                
+          grafana.ini:
+            database:
+              type: postgres
+              host: "grafana-prod-sg-rw:5432"
+              name: "grafana_production"
+              user: "$__file{/etc/grafana/secrets/grafana_db_username}"
+              password: "$__file{/etc/grafana/secrets/grafana_db_password}"
+              ssl_mode: require
+            smtp:
+              enabled: true
+              host: email-smtp.ap-southeast-2.amazonaws.com:587
+              from_address: grafana@demo.com
+              from_name: Demo Grafana
+              startTLSPolicy: Mandatory
+              
+          # --- DASHBOARDS ---
+          downloadDashboards:
+            envValueFrom:
+              GRAFANA_GITHUB_TOKEN:
+                secretKeyRef:
+                  name: "bws-kps-prod-sg"
+                  key: "grafana_github_token"
+
+          dashboards:
+            external-sources:
+              cnpg-official:
+                url: https://raw.githubusercontent.com/cloudnative-pg/grafana-dashboards/refs/heads/main/charts/cluster/grafana-dashboard.json
+                token: ''
+          dashboardProviders:
+            dashboardproviders.yaml:
+              apiVersion: 1
+              providers:
+                - name: 'default-dashboards'
+                  orgId: 1
+                  folder: ''
+                  type: file
+                  disableDeletion: true
+                  editable: true
+                  options:
+                    path: /var/lib/grafana/dashboards/default
+                - name: 'external-sources'
+                  orgId: 1
+                  folder: ''
+                  type: file
+                  disableDeletion: true
+                  editable: true
+                  options:
+                    path: /var/lib/grafana/dashboards/external-sources
+                - name: 'dashboards-in-development'
+                  orgId: 1
+                  folder: 'under-development'
+                  type: file
+                  disableDeletion: true
+                  editable: true
+                  options:
+                    path: /var/lib/grafana/dashboards/dashboards-in-development
+                # - name: 'dashboards-in-production'
+                #   orgId: 1
+                #   folder: 'production'
+                #   type: file
+                #   disableDeletion: true
+                #   editable: true
+                #   options:
+                #     path: /var/lib/grafana/dashboards/dashboards-in-production
+                - name: 'loki-dashboards'
+                  orgId: 1
+                  folder: 'LOGS'
+                  type: file
+                  disableDeletion: true
+                  editable: true
+                  options:
+                    path: /var/lib/grafana/dashboards/loki-dashboards
+          extraSecretMounts:
+            # - name: grafana-db-secret-mount
+            #   secretName: bws-grafana-prod
+            #   mountPath: /etc/grafana/secrets/
+            #   readOnly: true
+            - name: bws-kps-prod-sg-secret-mount
+              secretName: bws-kps-prod-sg
+              mountPath: /etc/grafana/secrets/
+              readOnly: true              
+          smtp:
+            enabled: true
+            host: email-smtp.ap-southeast-2.amazonaws.com:587
+            user: ${SMTP_USER}
+            password: ${SMTP_PASSWORD}
+            fromAddress: grafana@demo.com
+            fromName: Demo Grafana
+            startTLSPolicy: Mandatory
+          ingress:
+            enabled: true
+            ingressClassName: nginx
+            annotations:
+              cert-manager.io/cluster-issuer: letsencrypt-prod
+            hosts:
+              - grafana.tc.demo.com
+            tls:
+              - hosts:
+                  - grafana.tc.demo.com
+                secretName: grafana-tc-demo-com-tls
+          persistence:
+            enabled: false
+            storageClassName: do-block-storage
+            size: 2Gi
+          env:
+            GF_SERVER_DOMAIN: grafana.tc.demo.com
+            GF_SERVER_ROOT_URL: https://grafana.tc.demo.com
+            GF_SMTP_USER: ${SMTP_USER}
+            GF_SMTP_PASSWORD: ${SMTP_PASSWORD}
+          prune: true
+          sidecar:
+            dashboards:
+              enabled: true
+            datasources:
+              enabled: true
+              defaultDatasourceEnabled: false
+              isDefaultDatasource: false
+            resources:
+              requests:
+                memory: 120Mi
+              limits:
+                memory: 120Mi
+
+          additionalDataSources:
+            - name: prometheus-prod-sg
+              type: prometheus
+              uid: prom-prod-sg
+              access: proxy
+              basicAuth: false
+              editable: false
+              orgId: 1
+              url: http://{{ printf "%s-prometheus" .Release.Name }}:9090
+              version: 1
+            - name: prometheus-nonprod-sg
+              type: prometheus
+              uid: prom-nonprod-sg
+              access: proxy
+              basicAuth: true
+              basicAuthUser: ${BASIC_AUTH_USERNAME}
+              secureJsonData:
+                  basicAuthPassword: ${BASIC_AUTH_PASSWORD}
+              editable: false
+              jsonData:
+                  tlsSkipVerify: true
+              orgId: 1
+              url: https://prom-nonprod-sg.tc.demo.com/
+              version: 1
+            - name: prometheus-prod-au
+              type: prometheus
+              uid: prom-prod-au
+              isDefault: true
+              access: proxy
+              basicAuth: true
+              basicAuthUser: ${BASIC_AUTH_USERNAME}
+              secureJsonData:
+                  basicAuthPassword: ${BASIC_AUTH_PASSWORD}
+              editable: false
+              jsonData:
+                  tlsSkipVerify: true
+              orgId: 1
+              url: https://prom-prod-au.tc.demo.com/
+              version: 1
+            - name: loki
+              type: loki
+              uid: loki
+              access: proxy
+              basicAuth: true
+              basicAuthUser: ${BASIC_AUTH_USERNAME}
+              secureJsonData:
+                  basicAuthPassword: ${BASIC_AUTH_PASSWORD}
+              editable: false
+              orgId: 1
+              url: https://gateway.loki.tc.demo.com
+              version: 1
+
+          # --- Grafana Alerting ---
+          alerting:
+            policies.yaml:
+              apiVersion: 1
+              policies:
+                - orgId: 1
+                  receiver: default_receiver
+            contactpoints.yaml:
+              secret:
+                apiVersion: 1
+                contactPoints:
+                  - orgId: 1
+                    name: default_receiver
+                    receivers:
+                      - uid: 'default_receiver'
+                        type: email
+                        settings:
+                          addresses: 'niki@demo.com,devops@demo.com'
+                      - uid: 'ntfy_notifier'
+                        type: webhook
+                        settings:
+                          url: "https://ntfy.sh/demo?template=grafana"
+                          httpMethod: "POST"
+                      - uid: 'argo_self_heal'
+                        type: webhook
+                        settings:
+                          url: "https://restart.tc.demo.com/restart"
+                          httpMethod: "POST"
+            delete-rules.yaml:
+              apiVersion: 1
+              deleteRules:
+                - orgId: 1
+                  uid: cnpg_unhealthy_restart
+                - orgId: 1
+                  uid: high_cpu_node_prod_sg
+                - orgId: 1
+                  uid: high_cpu_node_nonprod_sg
+                - orgId: 1
+                  uid: high_cpu_node_prod_au
+                - orgId: 1
+                  uid: cnpg_health_dev
+                - orgId: 1
+                  uid: cnpg_health_stage
+                - orgId: 1
+                  uid: cnpg_health_qa
+                - orgId: 1
+                  uid: cnpg_health_carwash
+                - orgId: 1
+                  uid: cnpg_health_sga
+                - orgId: 1
+                  uid: cnpg_health_groupa
+                - orgId: 1
+                  uid: cnpg_health_groupb
+        ### End of Grafana ###
+
+        ### Start of Prometheus ###
+        prometheus:
+          ingress:
+            enabled: true
+            ingressClassName: nginx
+            annotations:
+              cert-manager.io/cluster-issuer: letsencrypt-prod
+              nginx.ingress.kubernetes.io/auth-type: basic
+              nginx.ingress.kubernetes.io/auth-secret: bws-kps-prod-sg
+              nginx.ingress.kubernetes.io/auth-realm: "Authentication Required"
+            hosts:
+              - prom-prod-sg.tc.demo.com
+            tls:
+              - hosts:
+                  - prom-prod-sg.tc.demo.com
+                secretName: prom-prod-sg-tc-demo-com-tls
+          prometheusSpec:
+            serviceMonitorSelectorNilUsesHelmValues: false
+            podMonitorSelectorNilUsesHelmValues: false
+            storageSpec:
+              volumeClaimTemplate:
+                spec:
+                  storageClassName: do-block-storage
+                  resources:
+                    requests:
+                      storage: 20Gi
+            resources:
+              requests:
+                cpu: 500m
+                memory: 1.5Gi
+              limits:
+                memory: 1.5Gi
+            retentionSize: 19GB
+            secrets:
+              - bws-kps-prod-sg
+            additionalScrapeConfigs:
+              - job_name: "uptime_kuma"
+                scrape_interval: 15s
+                scheme: https
+                metrics_path: "/metrics"
+                static_configs:
+                    - targets: ["kuma.tc.demo.com:443"]
+                
+        prometheusOperator:
+          resources:
+            requests:
+              memory: 40Mi
+            limits:
+              memory: 40Mi
+
+        prometheus-node-exporter:
+          resources:
+            requests:
+              memory: 30Mi
+            limits:
+              memory: 30Mi
+
+        kube-state-metrics:
+          resources:
+            requests:
+              memory: 100Mi
+            limits:
+              memory: 100Mi
+  destination:
+    name: do-sgp1-demo-production-sg
+    namespace: monitoring
+  syncPolicy:
+    # automated:
+    #   prune: true
+    #   selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

@@ -1,0 +1,100 @@
+# FILE: argocd/applicationsets/external-dns/appset-external-dns.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: external-dns
+  namespace: argocd
+spec:
+  generators:
+    - list:
+        elements:
+          - name: external-dns-aws-nonprod-sg
+            cluster: do-sgp1-demo-nonprod-sg
+            authTokenSecretName: bwsmma-auth-token-external-dns
+            secretKeyName1: aws_access_key_id
+            bwSecretId1: c7846271-7613-4346-a028-ba0f8a28e860
+            secretKeyName2: aws_secret_access_key
+            bwSecretId2: b04078ea-062e-453c-a8b0-e50f02c0a72d
+          - name: external-dns-aws-prod-sg
+            cluster: do-sgp1-demo-production-sg
+            authTokenSecretName: bwsmma-auth-token-external-dns
+            secretKeyName1: aws_access_key_id
+            bwSecretId1: c7846271-7613-4346-a028-ba0f8a28e860
+            secretKeyName2: aws_secret_access_key
+            bwSecretId2: b04078ea-062e-453c-a8b0-e50f02c0a72d
+  template:
+    metadata:
+      name: "{{name}}"
+    spec:
+      project: external-dns
+      sources:
+        - repoURL: https://github.com/djnixy/my-gitops-infra-stack
+          targetRevision: main
+          path: argocd/applicationsets/external-dns/credentials
+          kustomize:
+            patches:
+              - patch: |
+                  [
+                    { "op": "replace", "path": "/metadata/name", "value": "bws-{{name}}" },
+                    { "op": "replace", "path": "/spec/secretName", "value": "bws-{{name}}" },
+                    { "op": "replace", "path": "/spec/authToken/secretName", "value": "{{authTokenSecretName}}" },
+                    {
+                      "op": "replace",
+                      "path": "/spec/map",
+                      "value": [
+                        { "secretKeyName": "{{secretKeyName1}}", "bwSecretId": "{{bwSecretId1}}" },
+                        { "secretKeyName": "{{secretKeyName2}}", "bwSecretId": "{{bwSecretId2}}" }
+                      ]
+                    }
+                  ]
+                target:
+                  kind: BitwardenSecret
+                  name: placeholder
+
+        - repoURL: https://kubernetes-sigs.github.io/external-dns/
+          chart: external-dns
+          targetRevision: 1.19.0
+          helm:
+            values: |
+              provider: aws
+              env:
+                - name: AWS_ACCESS_KEY_ID
+                  valueFrom:
+                    secretKeyRef:
+                      name: "bws-{{name}}"
+                      key: "{{secretKeyName1}}"
+                - name: AWS_SECRET_ACCESS_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: "bws-{{name}}"
+                      key: "{{secretKeyName2}}"
+                - name: AWS_REGION
+                  value: us-east-1
+              txtOwnerId: "{{name}}"
+              domainFilters:
+                - demo.com.au
+                - demo.com
+              policy: sync
+              registry: txt
+              logLevel: info
+
+              resources:
+                requests:
+                  cpu: 25m
+                  memory: 50Mi
+                limits:
+                  cpu: 25m
+                  memory: 50Mi
+              serviceAccount:
+                create: true
+                annotations: {}
+
+      destination:
+        name: "{{cluster}}"
+        namespace: external-dns
+      syncPolicy:
+        syncOptions:
+          - CreateNamespace=true
+        automated:
+          prune: true
+          selfHeal: true

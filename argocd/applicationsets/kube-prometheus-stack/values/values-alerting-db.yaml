@@ -1,0 +1,37 @@
+# values-alerting-db.yaml
+grafana:
+  alerting:
+    db-rules.yaml:
+      apiVersion: 1
+      groups:
+            - uid: "cnpg_health_sga"
+              title: "DB Health: Core SGA"
+              condition: "C"
+              for: 0m
+              noDataState: OK
+              execErrState: Error
+              labels:
+                severity: "critical"
+                team: "devops"
+                env: "sga"
+                db_cluster: "pg14-core-sga"
+              annotations:
+                summary: "SGA Database Issue"
+                description: 'Cluster pg14-core-sga (Pod {{ "{{" }} $labels.pod {{ "}}" }}) is reporting errors. Log count: {{ "{{" }} $values.B.Value {{ "}}" }}'
+              data:
+                - refId: "A"
+                  datasourceUid: "loki"
+                  queryType: "range"
+                  relativeTimeRange: { from: 900, to: 0 }
+                  model:
+                    editorMode: "code"
+                    expr: 'count_over_time({pod=~"pg14-core-sga-.*"} |~ "(?i)(unhealthy|restart|panic|fatal|switchover|fencing|wal receiver process .* terminated)" [5m])'
+                    refId: "A"
+                - refId: "B"
+                  datasourceUid: "__expr__"
+                  queryType: "reduce"
+                  model: { expression: "A", reducer: "sum", refId: "B", type: "reduce" }
+                - refId: "C"
+                  datasourceUid: "__expr__"
+                  queryType: "math"
+                  model: { expression: "$B > 0", refId: "C", type: "math" }

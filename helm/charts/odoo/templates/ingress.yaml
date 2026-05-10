@@ -1,0 +1,66 @@
+{{- if .Values.ingress.enabled -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "odoo.fullname" . }}-core
+  labels:
+    {{- include "odoo.labels" . | nindent 4 }}
+  {{- with .Values.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- with .Values.ingress.ingressClassName }}
+  ingressClassName: {{ . }}
+  {{- end }}
+
+  {{- if .Values.ingress.hosts }}
+  tls:
+    {{- range .Values.ingress.hosts }}
+    {{- with .host }}
+    - hosts:
+        - {{ . | quote }}
+      secretName: {{ . | replace "." "-" | printf "%s-tls" }}
+    {{- end }}
+    {{- end }}
+  {{- end }}
+
+  rules:
+    {{- range .Values.ingress.hosts }}
+    - host: {{ .host | quote }}
+      http:
+        paths:
+
+          {{- if .paths }}
+            {{- range .paths }}
+            {{- if $.Values.longPollingEnabled }}
+            - path: /longpolling
+              pathType: Prefix
+              backend:
+                service:
+                  name: {{ include "odoo.fullname" $ }}-longpolling
+                  port:
+                    number: {{ $.Values.longPollingPort | default 8069 }}
+            {{- end }}
+            - path: {{ .path }}
+              {{- with .pathType }}
+              pathType: {{ . }}
+              {{- end }}
+              backend:
+                service:
+                  name: {{ include "odoo.fullname" $ }}
+                  port:
+                    number: {{ $.Values.service.port | default 8069 }}
+            {{- end }}
+          {{- else }}
+          
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "odoo.fullname" $ }}
+                port:
+                  number: {{ $.Values.service.port | default 8069 }}
+          {{- end }}
+    {{- end }}
+{{- end }}

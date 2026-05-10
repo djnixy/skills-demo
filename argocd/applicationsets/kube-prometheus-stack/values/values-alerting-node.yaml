@@ -1,0 +1,38 @@
+# values-alerting-node.yaml
+grafana:
+  alerting:
+    node-rules.yaml:
+      apiVersion: 1
+      groups:
+        - orgId: 1
+          name: "node-resources-prod-sg"
+          folder: "Cluster: Prod SG"
+          interval: 1m
+          rules:
+            - uid: "high_cpu_node_prod_sg"
+              title: "High CPU Usage (Prod SG)"
+              condition: "C"
+              for: 5m
+              labels:
+                severity: "critical"
+                team: "devops"
+                env: "prod-sg"
+              annotations:
+                summary: 'High CPU on {{ "{{" }} $labels.instance {{ "}}" }}'
+                description: 'Node {{ "{{" }} $labels.instance {{ "}}" }} at {{ "{{" }} $values.B.Value | humanize {{ "}}" }}%'
+              data:
+                - refId: "A"
+                  datasourceUid: "prom-prod-sg"
+                  queryType: "range"
+                  relativeTimeRange: { from: 600, to: 0 }
+                  model:
+                    expr: "100 - (avg by (instance) (rate(node_cpu_seconds_total{mode='idle'}[5m])) * 100)"
+                    refId: "A"
+                - refId: "B"
+                  datasourceUid: "__expr__"
+                  queryType: "reduce"
+                  model: { expression: "A", reducer: "mean", refId: "B", type: "reduce" }
+                - refId: "C"
+                  datasourceUid: "__expr__"
+                  queryType: "math"
+                  model: { expression: "$B > 85", refId: "C", type: "math" }

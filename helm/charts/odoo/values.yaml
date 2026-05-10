@@ -1,0 +1,246 @@
+blueGreenDeployment: false
+
+containerPort: 8069
+replicas: 1
+
+image:
+  repository: demo/wf-core
+  pullPolicy: IfNotPresent
+  tag: ""
+  
+imagePullSecrets:
+  - name: regcred
+
+## fixPathPermissions will launch an initContainer that changes the ownership of the filestore
+fixPathPermissions: true
+
+cron:
+  enabled: false
+  replicas: 1
+  maxCronThreads: 1
+  logLevel: info
+  dbName: base1
+  dbHost: "" # will use env from main/core apps if not specified
+  dbPort: "" # will use env from main/core apps if not specified
+  dbMaxConn: "5" # will use env from main/core apps if not specified
+  resources: 
+    requests:
+      cpu: 100m
+      memory: 300Mi
+    limits:
+      cpu: 100m
+      memory: 300Mi
+  # if sharding is enabled, dbName above will be ignored and will be replaced by databaseList
+  sharding:
+    enabled: false
+    databaseList: "base1,base2"
+
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  automount: true
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+podLabels: {}
+
+podSecurityContext: {}
+
+securityContext: {}
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: false
+  ingressClassName: nginx
+  annotations: {}
+  hosts:
+    - host: chart-example.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  # tls: [] #covered by cert-manager
+
+resources:
+  requests:
+    cpu: 256m
+    memory: 800Mi
+  limits:
+    memory: 800Mi
+
+startupProbe:
+  enabled: false
+  httpGet:
+    path: /
+    port: 8069
+  initialDelaySeconds: 5
+  periodSeconds: 5
+  timeoutSeconds: 2
+  failureThreshold: 5
+
+readinessProbe:
+  enabled: false
+  httpGet:
+    path: /
+    port: 8069
+  initialDelaySeconds: 5
+  periodSeconds: 15
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+livenessProbe:
+  enabled: false
+  httpGet:
+    path: /
+    port: 8069
+  initialDelaySeconds: 5
+  periodSeconds: 30
+  timeoutSeconds: 10
+  failureThreshold: 3
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 2
+  ## uncomment to use autoscaling
+  # targetCPUUtilizationPercentage: 70
+  # targetMemoryUtilizationPercentage: 90
+
+persistence:
+  enabled: false
+  accessMode: ReadWriteMany
+  size: 5Gi
+  storageClassName: "" # leave empty to use default, or use anything that supports RWX
+  mountPath: /var/lib/odoo # path inside the container
+
+# volumes: []
+# volumeMounts: []
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+strategy:
+  type: RollingUpdate
+  rollingUpdate:
+    maxUnavailable: 50%
+    maxSurge: 2 # default is 1
+
+pdb:
+  enabled: false
+  minAvailable: 1 # default is 1. You can set minAvailable OR maxUnavailable, not both.
+
+## Hatch
+# to be used for maintenance endpoint, will be useful if connection pooler is enabled.
+hatch:
+  enabled: false
+  replicas: 1
+  ingress: # ingressClassName for hatch will follow ingressClassName of core
+    enabled: false
+    annotations: {}
+    hosts:
+      - host: hatch-example.local
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 25%
+      maxSurge: 1
+
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 2
+    # targetCPUUtilizationPercentage: 70
+    # targetMemoryUtilizationPercentage: 90
+
+  # Environment variables for the hatch container
+  env:
+    HTTP_ENABLE: "True"
+    # ... other hatch-specific envs
+  secretEnvName: "" # e.g., bws-core-hatch-secrets
+  secretEnv: {}
+    # e.g., ADMIN_PASSWD: "hatch-admin-password-key"
+
+  # Probes for the hatch container
+  startupProbe:
+    enabled: true
+    httpGet:
+      path: /
+      port: 8069
+    initialDelaySeconds: 10
+    periodSeconds: 5
+    timeoutSeconds: 2
+    failureThreshold: 5
+  readinessProbe:
+    enabled: true
+    httpGet:
+      path: /
+      port: 8069
+    initialDelaySeconds: 5
+    periodSeconds: 15
+    timeoutSeconds: 5
+    failureThreshold: 3
+  livenessProbe:
+    enabled: true
+    httpGet:
+      path: /
+      port: 8069
+    initialDelaySeconds: 5
+    periodSeconds: 30
+    timeoutSeconds: 10
+    failureThreshold: 3
+
+  # Resources for the hatch container
+  resources:
+    requests:
+      cpu: 100m
+      memory: 300Mi
+    limits:
+      memory: 300Mi
+
+postgres:
+  enabled: false
+  database: odoo
+  username: odoo
+  password: changeme  # Optional: used to auto-create a secret if not already provided
+  pvcSize: 2Gi
+  secretName: ""      # Optional override. If empty, Helm will default to fullname-postgres-secret
+  storageClass: ""    # Optional override
+
+  # Optional: resource requests and limits. Can be left empty.
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      cpu: 500m
+      memory: 1Gi
+
+  # Optional: liveness and readiness probe settings. If not set, Helm chart can use defaults or skip them.
+  livenessProbe: {}
+  # Example:
+  # livenessProbe:
+  #   exec:
+  #     command: ["pg_isready", "-U", "odoo"]
+  #   initialDelaySeconds: 30
+  #   periodSeconds: 10
+  #   timeoutSeconds: 5
+  #   failureThreshold: 6
+
+  readinessProbe: {}
+  # Example:
+  # readinessProbe:
+  #   exec:
+  #     command: ["pg_isready", "-U", "odoo"]
+  #   initialDelaySeconds: 5
+  #   periodSeconds: 10
+  #   timeoutSeconds: 5
+  #   failureThreshold: 3

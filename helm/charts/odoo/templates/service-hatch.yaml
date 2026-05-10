@@ -1,0 +1,18 @@
+{{- if .Values.hatch.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "odoo.fullname" . }}-hatch
+  labels:
+    {{- include "odoo.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: {{ .Values.containerPort }}
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "odoo.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: hatch
+{{- end }}

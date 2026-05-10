@@ -1,0 +1,102 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: bws-kps
+  namespace: argocd
+spec:
+  generators:
+    - list:
+        elements:
+          - name: bws-kps-prod-sg
+            cluster: do-sgp1-demo-production-sg
+            
+            # --- BITWARDEN SECRET MAPPING ---
+            authTokenSecretName: bwsmma-auth-token-monitoring
+            # Grafana Admin Credentials
+            secretKeyName1: grafana_admin_user
+            bwSecretId1: 9cd23013-4b13-4c91-9a43-7465b4abbe5b
+            secretKeyName2: grafana_admin_password
+            bwSecretId2: 11bc0fbc-96ae-48bf-8657-a2d058fe100d
+            
+            # AWS SES (SMTP)
+            secretKeyName3: aws_ses_access_id
+            bwSecretId3: cb68bd61-79e8-44e5-8fa3-10326c134848
+
+            secretKeyName4: aws_ses_secret_key
+            bwSecretId4: b3659d41-6892-4a0b-81ef-60ca507621d8
+            
+            # Datasource Passwords
+            secretKeyName5: basic_auth_username
+            bwSecretId5: fa87bdf3-6d07-47b3-a9b8-ac913b415caa
+            secretKeyName6: basic_auth_password
+            bwSecretId6: 95918c26-607f-4573-b51f-1205b805d591
+            
+            # Prometheus Ingress Auth (Full htpasswd content)
+            secretKeyName7: auth
+            bwSecretId7: ac96dd32-8799-4960-a8b2-27be17d545b8
+
+            secretKeyName8: grafana_github_token
+            bwSecretId8: 8ae8ce2e-0bf3-471a-9e5c-23220a8f603f
+
+            secretKeyName9: uptime_kuma_api_token
+            bwSecretId9: 2efe7dff-2037-4114-b465-56432e1cf144
+
+            secretKeyName10: grafana_db_username
+            bwSecretId10: 0fb4a3a9-268a-41e0-b76d-589e21ed1a91
+            secretKeyName11: grafana_db_password
+            bwSecretId11: 7b0f8234-f481-4de0-91a5-c35fa1c01973
+            
+  template:
+    metadata:
+      name: '{{name}}'
+      annotations:
+        # This forces ArgoCD to delete/recreate ONLY this resource
+        # argocd.argoproj.io/sync-options: Replace=true
+        argocd.argoproj.io/sync-options: Force=true,Replace=true
+    spec:
+      project: kube-prometheus-stack
+      revisionHistoryLimit: 2
+      source:
+        repoURL: https://github.com/djnixy/my-gitops-infra-stack
+        targetRevision: main
+        path: argocd/applicationsets/grafana-loki/credentials
+        kustomize:
+          patches:
+            - patch: |
+                [
+                  { "op": "replace", "path": "/metadata/name", "value": "{{name}}" },
+                  { "op": "replace", "path": "/spec/secretName", "value": "{{name}}" },
+                  { "op": "replace", "path": "/spec/authToken/secretName", "value": "{{authTokenSecretName}}" },
+                  {
+                    "op": "replace",
+                    "path": "/spec/map",
+                    "value": [
+                      { "secretKeyName": "{{secretKeyName1}}", "bwSecretId": "{{bwSecretId1}}" },
+                      { "secretKeyName": "{{secretKeyName2}}", "bwSecretId": "{{bwSecretId2}}" },
+                      { "secretKeyName": "{{secretKeyName3}}", "bwSecretId": "{{bwSecretId3}}" },
+                      { "secretKeyName": "{{secretKeyName4}}", "bwSecretId": "{{bwSecretId4}}" },
+                      { "secretKeyName": "{{secretKeyName5}}", "bwSecretId": "{{bwSecretId5}}" },
+                      { "secretKeyName": "{{secretKeyName6}}", "bwSecretId": "{{bwSecretId6}}" },
+                      { "secretKeyName": "{{secretKeyName7}}", "bwSecretId": "{{bwSecretId7}}" },
+                      { "secretKeyName": "{{secretKeyName8}}", "bwSecretId": "{{bwSecretId8}}" },
+                      { "secretKeyName": "{{secretKeyName9}}", "bwSecretId": "{{bwSecretId9}}" },
+                      { "secretKeyName": "{{secretKeyName10}}", "bwSecretId": "{{bwSecretId10}}" },
+                      { "secretKeyName": "{{secretKeyName11}}", "bwSecretId": "{{bwSecretId11}}" }
+                    ]
+                  }
+                ]
+              target:
+                kind: BitwardenSecret
+                name: placeholder
+
+      destination:
+        name: '{{cluster}}'
+        namespace: monitoring
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply=true
+          # - Replace=true
