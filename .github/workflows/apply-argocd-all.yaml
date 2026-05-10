@@ -20,10 +20,10 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Install kubectl
-        uses: azure/setup-kubectl@f632314644558e8011270c538a7c29e1cd4208a3 # v4.0.0
+        uses: azure/setup-kubectl@829323503d1be3d00ca8346e5391ca0b07a9ab0d # v5.1.0
 
       - name: Install doctl
-        uses: digitalocean/action-doctl@135ac0a7c4948a3d6d59b0d2d3a33990885e33d4 # v2.5.1
+        uses: digitalocean/action-doctl@3cb3953159719656269e044e0e24ca16dd2a690f # v2.5.2
         with:
           token: ${{ secrets.DO_TOKEN }}
 
