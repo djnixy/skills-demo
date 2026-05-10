@@ -7,7 +7,7 @@ on:
         description: "DigitalOcean API token"
         required: true
         type: string
-
+        
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: false
@@ -44,4 +44,4 @@ jobs:
         run: terraform init
 
       - name: Terraform Plan
-        run: terraform plan -out=tfplan
+        run: terraform plan
