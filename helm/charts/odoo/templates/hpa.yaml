@@ -30,9 +30,7 @@ spec:
           averageUtilization: {{ .Values.autoscaling.targetMemoryUtilizationPercentage }}
     {{- end }}
 
-    {{- /* ------------------------------------------------------------- */}}
     {{- /* Autoscaling based on Nginx Requests Per Second                */}}
-    {{- /* ------------------------------------------------------------- */}}
     {{- if .Values.autoscaling.targetRequestsPerSecond }}
     - type: Object
       object:
@@ -41,12 +39,9 @@ spec:
         describedObject:
           apiVersion: v1
           kind: Service
-          # IMPORTANT: This assumes your Service has the same name as fullname.
-          # If your service is named differently, hardcode it or use a variable.
           name: {{ include "odoo.fullname" . }}
         target:
           type: Value
-          # We use | quote to ensure it handles "100m" strings correctly
           value: {{ .Values.autoscaling.targetRequestsPerSecond | quote }}
     {{- end }}
 {{- end }}

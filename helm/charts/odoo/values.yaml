@@ -218,11 +218,11 @@ postgres:
   # Optional: resource requests and limits. Can be left empty.
   resources:
     requests:
-      cpu: "500m"
-      memory: "1Gi"
+      cpu: 500m
+      memory: 1Gi
     limits:
-      cpu: "500m"
-      memory: "1Gi"
+      cpu: 500m
+      memory: 1Gi
 
   # Optional: liveness and readiness probe settings. If not set, Helm chart can use defaults or skip them.
   livenessProbe: {}

@@ -1,11 +1,7 @@
 {{- if .Values.cron.enabled }}
 
 {{- if .Values.cron.sharding.enabled }}
-{{/*
-=================================================================
-SHARDED MODE: Create one Deployment per database in the list
-=================================================================
-*/}}
+{{/* SHARDED MODE: Create one Deployment per database */}}
 {{- $dbList := .Values.cron.sharding.databaseList | splitList "," }}
 {{- range $dbName := $dbList }}
 {{- if $dbName }}
@@ -135,11 +131,7 @@ spec:
 {{- end }}
 
 {{- else }}
-{{/*
-=================================================================
-NON-SHARDED MODE: Original single Deployment
-=================================================================
-*/}}
+{{/* NON-SHARDED MODE: Original single Deployment */}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
