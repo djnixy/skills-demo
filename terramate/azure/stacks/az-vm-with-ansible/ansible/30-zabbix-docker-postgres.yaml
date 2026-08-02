@@ -1,0 +1,91 @@
+# ---
+# - name: Deploy Zabbix with PostgreSQL in Docker
+#   hosts: localhost
+#   become: yes
+#   vars:
+#     # Define the Zabbix and PostgreSQL versions
+#     seup_zabbix: false | bool
+#     zabbix_version: "alpine-6.0-latest"
+#     postgres_version: "15.4"
+#     # Define Zabbix environment variables
+#     zabbix_db_name: "zabbix"
+#     zabbix_db_user: "zabbix"
+#     zabbix_db_password: "zabbix_pass"
+#     zabbix_db_host: "postgres"
+#   tasks:
+#     - name: Install Docker
+#       apt:
+#         name: docker.io
+#         state: present
+#         update_cache: yes
+
+#     - name: Install Docker Compose
+#       apt:
+#         name: docker-compose
+#         state: present
+#         update_cache: yes
+
+#     - name: Create directory for Docker Compose
+#       file:
+#         path: /opt/zabbix
+#         state: directory
+#         mode: '0755'
+
+#     - name: Create Docker Compose file for Zabbix and PostgreSQL
+#       copy:
+#         dest: /opt/zabbix/docker-compose.yml
+#         content: |
+#           services:
+#             postgres:
+#               image: postgres:{{ postgres_version }}
+#               environment:
+#                 POSTGRES_DB: "{{ zabbix_db_name }}"
+#                 POSTGRES_USER: "{{ zabbix_db_user }}"
+#                 POSTGRES_PASSWORD: "{{ zabbix_db_password }}"
+#               volumes:
+#                 - postgres_data:/var/lib/postgresql/data
+#               restart: unless-stopped
+
+#             zabbix-server:
+#               image: zabbix/zabbix-server-pgsql:{{ zabbix_version }}
+#               environment:
+#                 DB_SERVER_HOST: "{{ zabbix_db_host }}"
+#                 POSTGRES_USER: "{{ zabbix_db_user }}"
+#                 POSTGRES_PASSWORD: "{{ zabbix_db_password }}"
+#                 POSTGRES_DB: "{{ zabbix_db_name }}"
+#               depends_on:
+#                 - postgres
+#               restart: unless-stopped
+
+#             zabbix-web:
+#               image: zabbix/zabbix-web-nginx-pgsql:{{ zabbix_version }}
+#               environment:
+#                 ZBX_SERVER_HOST: zabbix-server
+#                 DB_SERVER_HOST: "{{ zabbix_db_host }}"
+#                 POSTGRES_USER: "{{ zabbix_db_user }}"
+#                 POSTGRES_PASSWORD: "{{ zabbix_db_password }}"
+#                 POSTGRES_DB: "{{ zabbix_db_name }}"
+#               ports:
+#                 - "8080:8080"
+#               depends_on:
+#                 - zabbix-server
+#               restart: unless-stopped
+
+#             zabbix-agent:
+#               image: zabbix/zabbix-agent:{{ zabbix_version }}
+#               environment:
+#                 ZBX_SERVER_HOST: zabbix-server
+#               depends_on:
+#                 - zabbix-server
+#               restart: unless-stopped
+
+#           volumes:
+#             postgres_data:
+#       notify: 
+#         - Start Zabbix and PostgreSQL containers
+
+#   handlers:
+#     - name: Start Zabbix and PostgreSQL containers
+#       command: docker-compose up -d
+#       args:
+#         chdir: /opt/zabbix
