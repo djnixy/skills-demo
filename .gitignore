@@ -25,3 +25,5 @@ terraform.rc
 *tfplan*
 
 .infracost
+# Added by ggshield
+.cache_ggshield
