@@ -19,13 +19,14 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       
       - name: Login to GHCR
-        run: echo "${{ secrets.GITHUB_TOKEN }}" | helm registry login ghcr.io -u ${{ github.actor }} --password-stdin
+        run: echo "$GH_TOKEN" | helm registry login ghcr.io -u ${{ github.actor }} --password-stdin
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Package and Push
         run: |
           CHART_PATH="helm/charts/odoo"
-          CHART_NAME=$(basename $CHART_PATH)
-          echo "Processing chart: $CHART_NAME"
+          PACKAGE_FILE=$(helm package $CHART_PATH | awk '{print $NF}')
+          echo "Packaging chart: $PACKAGE_FILE"
           
-          helm package $CHART_PATH
-          helm push ${CHART_NAME}-*.tgz oci://ghcr.io/djnixy/charts
+          helm push $PACKAGE_FILE oci://ghcr.io/${{ github.repository_owner }}/charts
