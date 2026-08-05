@@ -1,7 +1,7 @@
 variable "project_name" {
   description = "Project name"
   type        = string
-  default     = "demoazure"
+  default     = "demoazure9988172"
 }
 
 variable "service_name" {
@@ -25,7 +25,7 @@ variable "env" {
 variable "region" {
   description = "Region"
   type        = string
-  default     = "eastus"
+  default     = "southeastasia"
 }
 
 variable "sql_admin_name" {

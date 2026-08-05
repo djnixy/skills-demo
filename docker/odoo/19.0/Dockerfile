@@ -37,7 +37,7 @@ RUN apt-get update && \
         python3-xlrd \
         python3-xlwt \
         xz-utils && \
-    WKHTMLTOPDF_ARCH=amd64 && WKHTMLTOPDF_SHA=4f723b2691ad8638a9df960e0421d346d7315083e3583a334f33362280ddba15 \\
+    WKHTMLTOPDF_ARCH=amd64 && WKHTMLTOPDF_SHA=4f723b2691ad8638a9df960e0421d346d7315083e3583a334f33362280ddba15 \
     && curl --proto "=https" -o wkhtmltox.deb -sSL "https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-3/wkhtmltox_0.12.6.1-3.jammy_${WKHTMLTOPDF_ARCH}.deb" \
     && echo "${WKHTMLTOPDF_SHA}  wkhtmltox.deb" | sha256sum -c - \
     && apt-get install -y --no-install-recommends ./wkhtmltox.deb \

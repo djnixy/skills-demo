@@ -1,11 +1,19 @@
 resource "azurerm_resource_group" "rg" {
   name     = local.rg_name
   location = var.region
+  tags = {
+    Service     = "demo"
+    Environment = "Dev"
+  }
 }
 
 resource "azurerm_resource_group" "rgshared" {
   name     = local.rg_shared_name
   location = var.region
+  tags = {
+    Service     = "demo"
+    Environment = "Dev"
+  }
 }
 
 resource "azurerm_container_registry" "acr" {
@@ -14,6 +22,10 @@ resource "azurerm_container_registry" "acr" {
   location            = azurerm_resource_group.rgshared.location
   sku                 = "Standard"
   admin_enabled       = true
+  tags = {
+    Service     = "demo"
+    Environment = "Dev"
+  }
 }
 
 resource "azurerm_service_plan" "appserviceplan" {
@@ -22,6 +34,10 @@ resource "azurerm_service_plan" "appserviceplan" {
   resource_group_name = local.rg_name
   os_type             = "Linux"
   sku_name            = "B1"
+  tags = {
+    Service     = "demo"
+    Environment = "Dev"
+  }
 }
 
 resource "azurerm_linux_web_app" "webapp" {
@@ -30,6 +46,11 @@ resource "azurerm_linux_web_app" "webapp" {
   resource_group_name = azurerm_resource_group.rg.name
   service_plan_id     = azurerm_service_plan.appserviceplan.id
   https_only          = true
+
+  tags = {
+    Service     = "demo"
+    Environment = "Dev"
+  }
 
   app_settings = {
     "WEBSITES_ENABLE_APP_SERVICE_STORAGE" = false
@@ -65,6 +86,10 @@ resource "azurerm_mssql_server" "mssqlserver" {
   minimum_tls_version          = "1.2"
   administrator_login          = var.sql_admin_name
   administrator_login_password = var.sql_admin_password
+  tags = {
+    Service     = "demo"
+    Environment = "Dev"
+  }
 }
 
 resource "azurerm_mssql_firewall_rule" "mssqlfirewallrule" {
@@ -81,6 +106,11 @@ resource "azurerm_mssql_elasticpool" "mssqlelasticpool" {
   server_name         = azurerm_mssql_server.mssqlserver.name
   #   license_type        = "LicenseIncluded"
   max_size_gb = 4.8828125
+
+  tags = {
+    Service     = "demo"
+    Environment = "Dev"
+  }
 
   sku {
     name = "BasicPool"
@@ -104,4 +134,8 @@ resource "azurerm_mssql_database" "mssqldatabase" {
   sku_name             = "ElasticPool"
   zone_redundant       = false
   storage_account_type = "Local"
+  tags = {
+    Service     = "demo"
+    Environment = "Dev"
+  }
 }
