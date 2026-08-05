@@ -12,7 +12,7 @@ ls -ld /var/lib/odoo
 echo "Creating Odoo config from template..."
 TMP_CONF="/tmp/odoo.conf"
 
-if [ -f /etc/odoo/odoo.conf.tpl ]; then
+if [[ -f /etc/odoo/odoo.conf.tpl ]]; then
     cp /etc/odoo/odoo.conf.tpl $TMP_CONF
     echo "Template copied to $TMP_CONF"
 else
@@ -20,15 +20,15 @@ else
     exit 1
 fi
 
-if [ -z "${DB_NAME}" ]; then
+if [[ -z "${DB_NAME}" ]]; then
     sed -i '/{{DB_NAME}}/d' $TMP_CONF
 fi
 
-if [ -z "${LOG_DB}" ]; then
+if [[ -z "${LOG_DB}" ]]; then
     sed -i '/{{LOG_DB}}/d' $TMP_CONF
 fi
 
-if [ -z "${ADMIN_PASSWD}" ]; then
+if [[ -z "${ADMIN_PASSWD}" ]]; then
     export ADMIN_PASSWD=$(tr -dc 'a-zA-Z0-9' < /dev/urandom | head -c 20)
     echo "ADMIN_PASSWD not provided. Generated a random 20-character alphanumeric password."
 fi
@@ -66,7 +66,7 @@ DEFAULTS=(
 for def in "${DEFAULTS[@]}"; do
     key="${def%%=*}"
     val="${def#*=}"
-    if [ -z "${!key}" ]; then
+    if [[ -z "${!key}" ]]; then
         export "$key"="$val"
         masked_val=$([[ "$key" =~ (ADMIN_PASSWD|DB_PASSWORD|PASSWORD) ]] && echo "******" || echo "$val")
         echo "Using default for $key: $masked_val"
@@ -93,7 +93,7 @@ echo "Final Odoo config (excluding sensitive values):"
 sed -E 's/(admin_passwd\s*=).*/\1 ******/g; s/(db_password\s*=).*/\1 ******/g' /etc/odoo/odoo.conf
 
 # Debugging environment variables
-if [ "$DEBUG" = "true" ]; then
+if [[ "$DEBUG" = "true" ]]; then
     echo "DEBUG: Printing Relevant Environment Variables..."
     env | grep -E "DB_|ADMIN_PASSWD|LOG_LEVEL|LIMIT_MEMORY" | sed -E 's/^(.*(ADMIN_PASSWD|DB_PASSWORD|PASSWORD))=.*$/\1=******/g' || true
     echo "------------------------------------------------------------"
