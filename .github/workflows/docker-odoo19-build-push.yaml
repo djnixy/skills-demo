@@ -8,6 +8,10 @@ on:
     paths:
       - 'docker/odoo/19.0/**'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
   packages: write
