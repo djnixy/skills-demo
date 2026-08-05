@@ -62,7 +62,7 @@ RUN groupadd -g 102 odoo \
     && useradd -u 102 -g 102 -m -d /var/lib/odoo -s /bin/bash odoo
 
 # Install rtlcss (on Debian buster)
-RUN npm install -g rtlcss
+RUN npm install -g --ignore-scripts rtlcss
 
 # Install Odoo
 ENV ODOO_VERSION=19.0
@@ -78,7 +78,7 @@ COPY ./requirements-custom.txt /tmp/requirements-custom.txt
 # COPY ./requirements.txt /tmp/requirements.txt
 
 # Install the dependencies from the requirements file
-RUN pip install --no-cache-dir --break-system-packages --ignore-installed typing-extensions -r /tmp/requirements-custom.txt \
+RUN pip install --no-cache-dir --only-binary=:all: --break-system-packages --ignore-installed typing-extensions -r /tmp/requirements-custom.txt \
     && rm -rf /tmp/requirements-custom.txt
     
 # Copy entrypoint script and Odoo configuration file
