@@ -38,13 +38,13 @@ RUN apt-get update && \
         python3-xlwt \
         xz-utils && \
     WKHTMLTOPDF_ARCH=amd64 && WKHTMLTOPDF_SHA=4f723b2691ad8638a9df960e0421d346d7315083e3583a334f33362280ddba15 \\
-    && curl -o wkhtmltox.deb -sSL "https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-3/wkhtmltox_0.12.6.1-3.jammy_${WKHTMLTOPDF_ARCH}.deb" \
+    && curl --proto "=https" -o wkhtmltox.deb -sSL "https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-3/wkhtmltox_0.12.6.1-3.jammy_${WKHTMLTOPDF_ARCH}.deb" \
     && echo "${WKHTMLTOPDF_SHA}  wkhtmltox.deb" | sha256sum -c - \
     && apt-get install -y --no-install-recommends ./wkhtmltox.deb \
     && rm -rf /var/lib/apt/lists/* wkhtmltox.deb
 
 # install latest postgresql-client
-RUN echo 'deb http://apt.postgresql.org/pub/repos/apt/ noble-pgdg main' > /etc/apt/sources.list.d/pgdg.list \
+RUN echo 'deb https://apt.postgresql.org/pub/repos/apt/ noble-pgdg main' > /etc/apt/sources.list.d/pgdg.list \
     && GNUPGHOME="$(mktemp -d)" \
     && export GNUPGHOME \
     && repokey='B97B0AFCAA1A47F044F244A07FCC7D46ACCC4CF8' \
@@ -68,7 +68,7 @@ RUN npm install -g rtlcss
 ENV ODOO_VERSION=19.0
 ARG ODOO_RELEASE=latest
 ARG ODOO_SHA=c30bb80fc9ea2a9b7bc2c719dbaf5efa311cb66b72d11fa94cf29071c67fd444
-RUN curl -o odoo.deb -sSL "http://nightly.odoo.com/${ODOO_VERSION}/nightly/deb/odoo_${ODOO_VERSION}.${ODOO_RELEASE}_all.deb" \
+RUN curl --proto "=https" -o odoo.deb -sSL "https://nightly.odoo.com/${ODOO_VERSION}/nightly/deb/odoo_${ODOO_VERSION}.${ODOO_RELEASE}_all.deb" \
     && echo "${ODOO_SHA} odoo.deb" | sha256sum -c - \
     && apt-get update \
     && apt-get -y install --no-install-recommends ./odoo.deb \
