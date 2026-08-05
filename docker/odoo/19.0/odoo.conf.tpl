@@ -1,10 +1,10 @@
 [options]
-addons_path = /mnt/extra-addons
-data_dir = /var/lib/odoo
+addons_path = {{ADDONS_PATH}}
+data_dir = {{DATA_DIR}}
 admin_passwd = {{ADMIN_PASSWD}}
 http_enable = {{HTTP_ENABLE}}
-port = {{PORT}}
-longpolling_port = {{LONGPOLLING_PORT}}
+http_port = {{HTTP_PORT}}
+http_interface = {{HTTP_INTERFACE}}
 db_host = {{DB_HOST}}
 db_port = {{DB_PORT}}
 db_user = {{DB_USER}}

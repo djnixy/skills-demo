@@ -20,40 +20,47 @@ else
     exit 1
 fi
 
+if [ -z "${DB_NAME}" ]; then
+    sed -i '/{{DB_NAME}}/d' $TMP_CONF
+fi
+
+if [ -z "${LOG_DB}" ]; then
+    sed -i '/{{LOG_DB}}/d' $TMP_CONF
+fi
+
+if [ -z "${ADMIN_PASSWD}" ]; then
+    export ADMIN_PASSWD=$(tr -dc 'a-zA-Z0-9' < /dev/urandom | head -c 20)
+    echo "ADMIN_PASSWD not provided. Generated a random 20-character alphanumeric password."
+fi
+
 # Set default values and allow alternative env variables
 DEFAULTS=(
-    "ADMIN_PASSWD="
-    "HTTP_ENABLE=True"
-    "XMLRPC_PORT=8069"
-    "LONGPOLLING_PORT=8072"
-    "DB_HOST=${DB_HOST:-${HOST:-localhost}}"
-    "DB_PORT=${DB_PORT:-${PORT:-5432}}"
-    "DB_USER=${DB_USER:-${USER:-odoo}}"
-    "DB_PASSWORD=${DB_PASSWORD:-${PASSWORD:-odoo}}"
-    "DB_MAXCONN=10"
-    "DB_SSLMODE=prefer"
-    "DB_NAME=False"
-    "DBFILTER=.*"
-    "LIMIT_REQUEST=8192"
-    "LIMIT_MEMORY_SOFT=2147483648"
-    "LIMIT_MEMORY_HARD=2684354560"
-    "LIMIT_TIME_CPU=60"
-    "LIMIT_TIME_REAL=300"
-    "LIST_DB=True"
-    "LOG_DB=False"
-    "LOG_LEVEL=info"
-    "MAX_CRON_THREADS=1"
-    "REDIS_SESSION=False"
-    "REDIS_TYPE=standalone"
-    "REDIS_HOST=localhost"
-    "REDIS_PORT=6379"
-    "REDIS_USERNAME="
-    "REDIS_PASSWORD="
-    "REDIS_EXPIRE=2592000"
-    "REDIS_SSL=False"
-    "SERVER_WIDE_MODULES=base,web"
-    "PROXY_MODE=True"
-    "WORKERS=0"
+    "ADDONS_PATH"=${ADDONS_PATH:-/mnt/extra-addons}
+    "DATA_DIR"=${DATA_DIR:-/var/lib/odoo}
+    "ADMIN_PASSWD"=${ADMIN_PASSWD}
+    "HTTP_ENABLE"=${HTTP_ENABLE:-True}
+    "HTTP_PORT"=${HTTP_PORT:-8069}
+    "HTTP_INTERFACE"=${HTTP_INTERFACE:-0.0.0.0}
+    "DB_HOST"=${DB_HOST:-${HOST:-db}}
+    "DB_PORT"=${DB_PORT:-${PORT:-5432}}
+    "DB_USER"=${DB_USER:-${POSTGRES_USER:-odoo}}
+    "DB_PASSWORD"=${DB_PASSWORD:-${POSTGRES_PASSWORD}}
+    "DB_MAXCONN"=${DB_MAXCONN:-100}
+    "DB_SSLMODE"=${DB_SSLMODE:-prefer}
+    "DB_NAME"=${DB_NAME}
+    "DBFILTER"=${DBFILTER:-.*}
+    "LIMIT_REQUEST"=${LIMIT_REQUEST:-8192}
+    "LIMIT_MEMORY_SOFT"=${LIMIT_MEMORY_SOFT:-2147483648}
+    "LIMIT_MEMORY_HARD"=${LIMIT_MEMORY_HARD:-2684354560}
+    "LIMIT_TIME_CPU"=${LIMIT_TIME_CPU:-60}
+    "LIMIT_TIME_REAL"=${LIMIT_TIME_REAL:-300}
+    "LIST_DB"=${LIST_DB:-True}
+    "LOG_DB"=${LOG_DB}
+    "LOG_LEVEL"=${LOG_LEVEL:-info}
+    "MAX_CRON_THREADS"=${MAX_CRON_THREADS:-1}
+    "SERVER_WIDE_MODULES"=${SERVER_WIDE_MODULES:-base,web}
+    "PROXY_MODE"=${PROXY_MODE:-True}
+    "WORKERS"=${WORKERS:-0}
 )
 
 for def in "${DEFAULTS[@]}"; do
@@ -73,7 +80,10 @@ done
 for VAR in $(compgen -e); do
     masked_val=$([[ "$VAR" =~ (ADMIN_PASSWD|DB_PASSWORD|PASSWORD) ]] && echo "******" || echo "${!VAR}")
     echo "Replacing $VAR in config (value: $masked_val)..."
-    sed -i "s|{{${VAR}}}|${!VAR}|g" $TMP_CONF
+    
+    # Safely escape pipes so sed doesn't crash if a password contains a '|'
+    safe_val=$(printf '%s\n' "${!VAR}" | sed 's/|/\\|/g')
+    sed -i "s|{{${VAR}}}|${safe_val}|g" "$TMP_CONF"
 done
 
 echo "Moving generated config to /etc/odoo/odoo.conf..."
@@ -85,15 +95,9 @@ sed -E 's/(admin_passwd\s*=).*/\1 ******/g; s/(db_password\s*=).*/\1 ******/g' /
 # Debugging environment variables
 if [ "$DEBUG" = "true" ]; then
     echo "DEBUG: Printing Relevant Environment Variables..."
-    env | grep -E "DB_|ADMIN_PASSWD|LOG_LEVEL|LIMIT_MEMORY" | sed -E 's/(ADMIN_PASSWD|DB_PASSWORD|PASSWORD)=[^ ]+/******/' 
+    env | grep -E "DB_|ADMIN_PASSWD|LOG_LEVEL|LIMIT_MEMORY" | sed -E 's/^(.*(ADMIN_PASSWD|DB_PASSWORD|PASSWORD))=.*$/\1=******/g' || true
     echo "------------------------------------------------------------"
 fi
-
-# Set the PostgreSQL database host, port, user, and password from environment variables
-: ${DB_HOST:=${DB_PORT_5432_TCP_ADDR:='db'}}
-: ${DB_PORT:=${DB_PORT_5432_TCP_PORT:=5432}}
-: ${DB_USER:=${DB_ENV_POSTGRES_USER:=${POSTGRES_USER:='odoo'}}}
-: ${DB_PASSWORD:=${DB_ENV_POSTGRES_PASSWORD:=${POSTGRES_PASSWORD:='odoo'}}}
 
 DB_ARGS=()
 
@@ -105,8 +109,7 @@ function check_config() {
 
     # Check if the parameter exists in /etc/odoo/odoo.conf
     if grep -q -E "^\s*\b${param}\b\s*=" "/etc/odoo/odoo.conf" ; then       
-        # Extract the existing value from the config file
-        extracted_value=$(grep -E "^\s*\b${param}\b\s*=" "/etc/odoo/odoo.conf" | cut -d " " -f3 | sed 's/["\n\r]//g')
+        extracted_value=$(grep -E "^\s*\b${param}\b\s*=" "/etc/odoo/odoo.conf" | awk -F '=' '{print $2}' | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's/["\n\r]//g')
         value="${extracted_value}"
         masked_value=$([[ "$param" =~ (db_password|ADMIN_PASSWD|PASSWORD) ]] && echo "******" || echo "$value")
         echo "Found ${param} in odoo.conf: $masked_value"
@@ -125,22 +128,4 @@ check_config "db_port" "$DB_PORT"
 check_config "db_user" "$DB_USER"
 check_config "db_password" "$DB_PASSWORD"
 
-case "$1" in
-    -- | odoo)
-        shift
-        if [[ "$1" == "scaffold" ]] ; then
-            exec odoo "$@"
-        else
-            wait-for-psql.py ${DB_ARGS[@]} --timeout=30
-            exec odoo "$@" "${DB_ARGS[@]}"
-        fi
-        ;;
-    -*)
-        wait-for-psql.py ${DB_ARGS[@]} --timeout=30
-        exec odoo "$@" "${DB_ARGS[@]}"
-        ;;
-    *)
-        exec "$@"
-esac
-
-exit 1
+exec "$@"

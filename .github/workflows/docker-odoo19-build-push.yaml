@@ -1,4 +1,4 @@
-name: Build and Push Docker Image for Odoo 14
+name: Build and Push Docker Image for Odoo 19
 
 on:
   workflow_dispatch:
@@ -6,19 +6,19 @@ on:
     branches:
       - main
     paths:
-      - 'docker/odoo/14.0/**'
+      - 'docker/odoo/19.0/**'
 
 permissions:
   contents: read
   packages: write
 
 jobs:
-  build-and-push-odoo14:
+  build-and-push:
     runs-on: ubuntu-latest
     env:
-      PG_VERSION: pg14
-      DOCKERFILE: Dockerfile.bullseye.pg14
-      CONTEXT_PATH: "docker/odoo/14.0"
+      PG_VERSION: pg18
+      DOCKERFILE: Dockerfile
+      CONTEXT_PATH: "docker/odoo/19.0"
           
     steps:
       - name: Checkout Repository
@@ -41,14 +41,14 @@ jobs:
           file: ${{ env.CONTEXT_PATH }}/${{ env.DOCKERFILE }}
           push: ${{ github.event_name != 'pull_request' }}
           tags: |
-            ghcr.io/${{ github.repository_owner }}/odoo14:${{ env.PG_VERSION }}-latest
-            ghcr.io/${{ github.repository_owner }}/odoo14:${{ env.PG_VERSION }}-build-${{ steps.vars.outputs.date }}.${{ github.run_number }}
+            ghcr.io/${{ github.repository_owner }}/odoo19:${{ env.PG_VERSION }}-latest
+            ghcr.io/${{ github.repository_owner }}/odoo19:${{ env.PG_VERSION }}-build-${{ steps.vars.outputs.date }}.${{ github.run_number }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25
         with:
-          image-ref: 'ghcr.io/${{ github.repository_owner }}/odoo14:${{ env.PG_VERSION }}-latest'
+          image-ref: 'ghcr.io/${{ github.repository_owner }}/odoo19:${{ env.PG_VERSION }}-latest'
           format: 'table'
           severity: 'CRITICAL,HIGH'
