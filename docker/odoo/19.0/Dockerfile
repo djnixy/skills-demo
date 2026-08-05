@@ -62,7 +62,7 @@ RUN groupadd -g 102 odoo \
     && useradd -u 102 -g 102 -m -d /var/lib/odoo -s /bin/bash odoo
 
 # Install rtlcss (on Debian buster)
-RUN npm install -g --ignore-scripts rtlcss
+RUN npm install -g --ignore-scripts rtlcss@4.3.0
 
 # Install Odoo
 ENV ODOO_VERSION=19.0
