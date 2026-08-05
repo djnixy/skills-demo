@@ -104,8 +104,8 @@ resource "azurerm_mssql_elasticpool" "mssqlelasticpool" {
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
   server_name         = azurerm_mssql_server.mssqlserver.name
-  #   license_type        = "LicenseIncluded"
-  max_size_gb = 4.8828125
+  license_type        = "LicenseIncluded"
+  max_size_gb         = 4.8828125
 
   tags = {
     Service     = "demo"
