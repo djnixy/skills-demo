@@ -40,7 +40,7 @@ module "ecs" {
 }
 
 resource "aws_ecs_task_definition" "res-td-frontend" {
-  # container_definitions    = "[{\"cpu\":0,\"environment\":[],\"essential\":true,\"image\":\"333831717381.dkr.ecr.ap-southeast-2.amazonaws.com/wooshfood-onboarding-frontend:development-109\",\"logConfiguration\":{\"logDriver\":\"awslogs\",\"options\":{\"awslogs-group\":\"/ecs/wf-onboarding-fe-dev\",\"awslogs-region\":\"ap-southeast-2\",\"awslogs-stream-prefix\":\"ecs\"}},\"mountPoints\":[],\"name\":\"app\",\"portMappings\":[{\"containerPort\":80,\"hostPort\":80,\"protocol\":\"tcp\"}],\"volumesFrom\":[]}]"
+  # container_definitions    = "[{\"cpu\":0,\"environment\":[],\"essential\":true,\"image\":\"333831717381.dkr.ecr.ap-southeast-2.amazonaws.com/demo:development-109\",\"logConfiguration\":{\"logDriver\":\"awslogs\",\"options\":{\"awslogs-group\":\"/ecs/wf-onboarding-fe-dev\",\"awslogs-region\":\"ap-southeast-2\",\"awslogs-stream-prefix\":\"ecs\"}},\"mountPoints\":[],\"name\":\"app\",\"portMappings\":[{\"containerPort\":80,\"hostPort\":80,\"protocol\":\"tcp\"}],\"volumesFrom\":[]}]"
   container_definitions = <<EOF
   [
     {
@@ -54,7 +54,7 @@ resource "aws_ecs_task_definition" "res-td-frontend" {
           "LineFormat": "key_value",
           "Labels": "{job=\"firelens\"}",
           "LabelKeys": "container_name,ecs_task_definition,source,ecs_cluster",
-          "Url": "https://loki.tc.wooshfood.com/loki/api/v1/push",
+          "Url": "https://loki.nikiakbar.com/loki/api/v1/push",
           "Name": "grafana-loki"
         }
       },
@@ -78,7 +78,7 @@ resource "aws_ecs_task_definition" "res-td-frontend" {
           "LineFormat": "key_value",
           "Labels": "{job=\"firelens\"}",
           "LabelKeys": "container_name,ecs_task_definition,source,ecs_cluster",
-          "Url": "https://loki.tc.wooshfood.com/loki/api/v1/push",
+          "Url": "https://loki.nikiakbar.com/loki/api/v1/push",
           "Name": "grafana-loki"
         }
       },
