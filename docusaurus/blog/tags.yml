@@ -1,0 +1,24 @@
+devops:
+  label: DevOps
+  permalink: /devops
+  description: Automation, CI/CD pipelines, and the intersection of development and operations.
+
+infrastructure:
+  label: Infrastructure
+  permalink: /infrastructure
+  description: Infrastructure as Code (IaC), cloud architecture, and platform engineering.
+
+security:
+  label: Security
+  permalink: /security
+  description: DevSecOps, cloud security posture management, and identity access control.
+
+kubernetes:
+  label: Kubernetes
+  permalink: /kubernetes
+  description: Container orchestration, cluster management, and ecosystem tooling.
+
+automation:
+  label: Automation
+  permalink: /automation
+  description: Scripting, workflow optimization, and reducing manual toil.

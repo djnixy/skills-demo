@@ -1,0 +1,9 @@
+niki:
+  name: Niki Akbar
+  title: Devops
+  url: https://linkedin.com/in/nikiakbar
+  image_url: https://github.com/djnixy.png
+  page: true
+  socials:
+    linkedin: nikiakbar
+    github: djnixy
