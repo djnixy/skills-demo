@@ -2,6 +2,7 @@ name: Apply ArgoCD Configuration - All
 
 on:
   workflow_dispatch:
+  push:
     paths:
       - 'argocd/applicationsets/**'
 

@@ -1,0 +1,137 @@
+<mxfile host="Electron">
+  <diagram name="Talos Bot Full Lifecycle" id="YBPHg-euh0gXjgm9oUGh">
+    <mxGraphModel dx="1381" dy="856" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="0" page="0" pageScale="1" pageWidth="1200" pageHeight="2200" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="node_start" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="Event Trigger" vertex="1">
+          <mxGeometry height="60" width="120" x="380" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="node_trigger_type" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" value="Event Type" vertex="1">
+          <mxGeometry height="80" width="120" x="380" y="106" as="geometry" />
+        </mxCell>
+        <mxCell id="container_estimate" parent="1" style="swimlane;startSize=30;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Request Validation" vertex="1">
+          <mxGeometry height="600" width="240" x="320" y="250" as="geometry" />
+        </mxCell>
+        <mxCell id="step_est_token" parent="container_estimate" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;" value="Generate Bot Token" vertex="1">
+          <mxGeometry height="60" width="160" x="40" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="step_est_parse" parent="container_estimate" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;" value="Parse Issue Body" vertex="1">
+          <mxGeometry height="60" width="160" x="40" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="step_est_merchant" parent="container_estimate" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;" value="Extract Merchant Name &amp; Domain" vertex="1">
+          <mxGeometry height="60" width="200" x="20" y="230" as="geometry" />
+        </mxCell>
+        <mxCell id="step_est_group" parent="container_estimate" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;" value="Determine Group" vertex="1">
+          <mxGeometry height="60" width="160" x="37.5" y="320" as="geometry" />
+        </mxCell>
+        <mxCell id="step_est_features" parent="container_estimate" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;" value="Check Feature Flags" vertex="1">
+          <mxGeometry height="60" width="160" x="37.5" y="410" as="geometry" />
+        </mxCell>
+        <mxCell id="step_est_reply" parent="container_estimate" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1" value="Reply with Summary Table" vertex="1">
+          <mxGeometry height="60" width="160" x="37.5" y="500" as="geometry" />
+        </mxCell>
+        <mxCell id="edge_est1" edge="1" parent="container_estimate" source="step_est_token" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="step_est_parse" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge_est2" edge="1" parent="container_estimate" source="step_est_parse" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="step_est_merchant" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge_est3" edge="1" parent="container_estimate" source="step_est_merchant" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="step_est_group" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge_est4" edge="1" parent="container_estimate" source="step_est_group" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="step_est_features" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge_est5" edge="1" parent="container_estimate" source="step_est_features" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="step_est_reply" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="node_dispatch" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1" value="Dispatch Workflow Run" vertex="1">
+          <mxGeometry height="60" width="160" x="600" y="480" as="geometry" />
+        </mxCell>
+        <mxCell id="container_provisioning" parent="1" style="swimlane;startSize=30;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Add New Merchant" vertex="1">
+          <mxGeometry height="870" width="240" x="800" y="250" as="geometry" />
+        </mxCell>
+        <mxCell id="prov_setup" parent="container_provisioning" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;" value="Setup Tooling&#xa;(yq, argocd, bw, bws)" vertex="1">
+          <mxGeometry height="60" width="160" x="40" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="prov_inventory" parent="container_provisioning" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;" value="Update Inventory&#xa;(devops-toolkits)" vertex="1">
+          <mxGeometry height="60" width="160" x="40" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="prov_gitops" parent="container_provisioning" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;" value="Update GitOps AppSets&#xa;(gitops-infra-stack)" vertex="1">
+          <mxGeometry height="60" width="160" x="40" y="230" as="geometry" />
+        </mxCell>
+        <mxCell id="prov_db_restore" parent="container_provisioning" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;" value="Odoo Restore Job&lt;br&gt;(S3 Presigned URL --&amp;gt; K8s Job)" vertex="1">
+          <mxGeometry height="60" width="160" x="40" y="320" as="geometry" />
+        </mxCell>
+        <mxCell id="prov_core_sync" parent="container_provisioning" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;" value="Update Core Values &amp; Sync&#xa;(ArgoCD Sync)" vertex="1">
+          <mxGeometry height="60" width="160" x="40" y="410" as="geometry" />
+        </mxCell>
+        <mxCell id="prov_commerce_trigger" parent="container_provisioning" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;" value="Trigger Other Component&lt;br&gt;Deployment Workflow" vertex="1">
+          <mxGeometry height="60" width="160" x="40" y="500" as="geometry" />
+        </mxCell>
+        <mxCell id="prov_module_install" parent="container_provisioning" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;" value="Run Module Install Job&#xa;(Based on Feature Flags)" vertex="1">
+          <mxGeometry height="60" width="160" x="40" y="590" as="geometry" />
+        </mxCell>
+        <mxCell id="prov_https_check" parent="container_provisioning" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;" value="Verify HTTPS Certificate" vertex="1">
+          <mxGeometry height="60" width="160" x="40" y="680" as="geometry" />
+        </mxCell>
+        <mxCell id="prov_final_comment" parent="container_provisioning" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1" value="Post Success Comment&#xa;(GitHub Issue)" vertex="1">
+          <mxGeometry height="60" width="160" x="40" y="770" as="geometry" />
+        </mxCell>
+        <mxCell id="edge_p1" edge="1" parent="container_provisioning" source="prov_setup" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="prov_inventory" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge_p2" edge="1" parent="container_provisioning" source="prov_inventory" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="prov_gitops" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge_p3" edge="1" parent="container_provisioning" source="prov_gitops" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="prov_db_restore" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge_p4" edge="1" parent="container_provisioning" source="prov_db_restore" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="prov_core_sync" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge_p5" edge="1" parent="container_provisioning" source="prov_core_sync" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="prov_commerce_trigger" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge_p6" edge="1" parent="container_provisioning" source="prov_commerce_trigger" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="prov_module_install" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge_p7" edge="1" parent="container_provisioning" source="prov_module_install" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="prov_https_check" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge_p8" edge="1" parent="container_provisioning" source="prov_https_check" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="prov_final_comment" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="node_end" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" value="End" vertex="1">
+          <mxGeometry height="60" width="80" x="880" y="1160" as="geometry" />
+        </mxCell>
+        <mxCell id="edge1" edge="1" parent="1" source="node_start" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="node_trigger_type" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge2" edge="1" parent="1" source="node_trigger_type" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="step_est_token" value="New Issue (New Merchant Request template)">
+          <mxGeometry relative="1" x="-0.7778" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="440" y="240" />
+              <mxPoint x="440" y="240" />
+            </Array>
+            <mxPoint x="750" y="180" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge_dispatch_to_prov" edge="1" parent="1" source="node_dispatch" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;flowAnimation=1;" target="prov_setup" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1220" y="930" as="sourcePoint" />
+            <mxPoint x="1140" y="80" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge_final" edge="1" parent="1" source="prov_final_comment" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="node_end" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="jz8F-0MNex4vKIXcywpu-2" edge="1" parent="1" source="step_est_reply" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;flowAnimation=1;" target="node_dispatch" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
