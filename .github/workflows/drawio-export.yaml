@@ -23,15 +23,25 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Export drawio files to asciidoctor and png files
+      - name: Export drawio files
         uses: rlespinasse/drawio-export-action@6900c4d8a1fb066e0a0a3570574439487546feab #v2.54.0
         with:
-          format: adoc
+          format: svg
           transparent: true
           output: drawio-assets
 
+      - name: Check exported files
+        run: |
+          echo "=== Git status ==="
+          git status --short
+      
+          echo "=== drawio-assets ==="
+          find drawio-assets -type f -print 2>/dev/null || true
+      
+          echo "=== Git diff ==="
+          git diff --stat
+          
       - name: Get author and committer info from HEAD commit
         uses: rlespinasse/git-commit-data-action@2b76766acf9574c24b5cec7608be8db5dc17968e #v1.5.0
         if: github.ref == 'refs/heads/main'
