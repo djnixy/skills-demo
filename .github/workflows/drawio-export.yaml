@@ -30,6 +30,7 @@ jobs:
           format: svg
           transparent: true
           output: drawio-assets
+          action-mode: all
 
       - name: Check exported files
         run: |
@@ -38,9 +39,6 @@ jobs:
       
           echo "=== drawio-assets ==="
           find drawio-assets -type f -print 2>/dev/null || true
-      
-          echo "=== Git diff ==="
-          git diff --stat
           
       - name: Get author and committer info from HEAD commit
         uses: rlespinasse/git-commit-data-action@2b76766acf9574c24b5cec7608be8db5dc17968e #v1.5.0
