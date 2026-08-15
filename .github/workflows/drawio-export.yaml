@@ -7,6 +7,7 @@ on:
     paths:
       - "diagrams/**/*.drawio"
       - .github/workflows/drawio-export.yaml
+
 concurrency:
   group: drawio-export-${{ github.ref }}
   cancel-in-progress: true
