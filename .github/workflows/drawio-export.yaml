@@ -1,4 +1,4 @@
-name: Keep draw.io export synchronized
+name: draw.io exports
 
 on:
   push:
@@ -24,7 +24,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Export drawio files
+      - name: Export drawio files to svg
         uses: rlespinasse/drawio-export-action@6900c4d8a1fb066e0a0a3570574439487546feab #v2.54.0
         with:
           format: svg
@@ -32,6 +32,14 @@ jobs:
           output: drawio-assets
           action-mode: all
 
+      - name: Export drawio files to jpg
+        uses: rlespinasse/drawio-export-action@6900c4d8a1fb066e0a0a3570574439487546feab #v2.54.0
+        with:
+          format: jpg
+          transparent: false
+          output: drawio-assets
+          action-mode: all
+          
       - name: Check exported files
         run: |
           echo "=== Git status ==="
