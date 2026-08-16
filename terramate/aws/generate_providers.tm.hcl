@@ -6,12 +6,12 @@ terraform {
     # https://registry.terraform.io/providers/hashicorp/aws/latest
     aws = {
       source = "hashicorp/aws"
-      version = "~> 5.64.0"
+      version = "~> 6.60.0"
     }
     # https://registry.terraform.io/providers/hashicorp/kubernetes/latest
     kubernetes = {
       source  = "hashicorp/kubernetes"
-      version = "~> 2.32.0"
+      version = "~> 3.2.1"
     }
   }
 }
@@ -32,6 +32,13 @@ provider "aws" {
             Project     = var.project_name
         }
     }
+}
+
+provider "kubernetes" {
+  host =  module.eks.cluster_endpoint
+  token                  = module.eks.token
+  cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
+    # aws_eks_cluster.my-cluster.certificate_authority.0.data)
 }
 
   }

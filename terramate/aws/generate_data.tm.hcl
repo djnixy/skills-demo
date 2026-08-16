@@ -14,6 +14,7 @@ data "aws_availability_zones" "available" {}
 
 data "aws_ami" "eks_default" {
   most_recent = true
+  owners      = ["amazon"]
 
   filter {
     name   = "name"
@@ -28,6 +29,7 @@ data "aws_ami" "eks_default" {
 
 data "aws_ami" "eks_default_bottlerocket" {
   most_recent = true
+  owners      = ["amazon"]
 
   filter {
     name   = "name"
