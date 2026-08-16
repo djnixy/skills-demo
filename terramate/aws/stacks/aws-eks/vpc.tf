@@ -7,8 +7,8 @@ module "vpc" {
 
   azs = local.azs
 
-  # private_subnet_names = ["private-snet-a", "private-snet-b"]
-  # private_subnets = [for k, v in local.azs : cidrsubnet(var.vpc_cidr, 4, k)]
+  private_subnet_names = ["private-snet-a", "private-snet-b"]
+  private_subnets = [for k, v in local.azs : cidrsubnet(var.vpc_cidr, 4, k)]
 
   public_subnet_names = ["public-snet-a", "public-snet-b"]
   public_subnets      = [for k, v in local.azs : cidrsubnet(var.vpc_cidr, 4, k + 2)]
@@ -18,8 +18,8 @@ module "vpc" {
   # database_subnets   = [for k, v in local.azs : cidrsubnet(var.vpc_cidr, 4, k + 14)]
 
 
-  # enable_nat_gateway = true
-  # single_nat_gateway = true
+  enable_nat_gateway = false # keep it false for testing
+  single_nat_gateway = false # keep it false for testing
 
   public_subnet_tags = {
     "kubernetes.io/role/elb" = 1
