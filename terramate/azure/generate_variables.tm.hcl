@@ -46,7 +46,7 @@ generate_hcl "_terramate_generated_variables.tf" {
 
     variable "sql_admin_password" {
       type    = string
-      default = "NOTsoSecurePassword893!"
+      default = ""
     }
 
     variable "database_name" {
@@ -70,13 +70,13 @@ generate_hcl "_terramate_generated_variables.tf" {
       waf_policy_name                = join("-", ["waf", var.project_name, var.environment])
       app_gateway_name               = join("-", ["agw", var.project_name, var.environment])
       vnet_name                       = join("-", ["vnet", var.project_name, var.environment])
-      planName                       = join("-", ["plan", var.project_name, var.environment])
-      appName                        = join("-", ["app", var.project_name, var.service_name, var.environment])
+      plan_name                       = join("-", ["plan", var.project_name, var.environment])
+      app_name                        = join("-", ["app", var.project_name, var.service_name, var.environment])
 
       sql_server_name = join("-", ["mysql", var.project_name, var.environment])
-      # sqlPoolName     = join("-", ["pool", var.project_name, var.environment])
-      # sqlDBName       = join("-", ["sqldb", var.databaseName , var.environment])
-      # sqlDBName1      = join("-", ["sqldb", var.databaseName1 , var.environment])
+      # sql_pool_name     = join("-", ["pool", var.project_name, var.environment])
+      # sql_db_name       = join("-", ["sqldb", var.database_name , var.environment])
+      # sql_db_name_1      = join("-", ["sqldb", var.database_name_1 , var.environment])
     }
   }
 }

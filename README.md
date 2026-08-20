@@ -1,3 +1,4 @@
+[![Quality gate status](https://sonarcloud.io/api/project_badges/measure?project=djnixy_skills-demo&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=djnixy_skills-demo)
 [![Terraform Plan - DO Droplet](https://github.com/djnixy/skills-demo/actions/workflows/terraform-plan-do-droplet.yaml/badge.svg)](https://github.com/djnixy/skills-demo/actions/workflows/terraform-plan-do-droplet.yaml)
 [![Build and Push Docker Image for Odoo 14](https://github.com/djnixy/skills-demo/actions/workflows/docker-odoo14-build-push.yaml/badge.svg)](https://github.com/djnixy/skills-demo/actions/workflows/docker-odoo14-build-push.yaml)
 

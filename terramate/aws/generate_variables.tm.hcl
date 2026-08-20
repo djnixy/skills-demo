@@ -44,7 +44,7 @@ variable "database_admin_name" {
 variable "database_admin_password" {
   # description = ""
   type        = string
-  default = "NOTsoSecurePassword893!"
+  default = ""
 }
 
 variable "database_name" {
